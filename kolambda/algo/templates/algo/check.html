@@ -1,0 +1,148 @@
+{% extends "algo/base.html" %}
+{% load staticfiles %}
+
+{% block title %}Check {{ algorithm.name }} - {{ block.super }}{% endblock %}
+
+{% block includes %}
+<script src="{% static 'algo/lib/codemirror-5.3/lib/codemirror.js' %}"></script>
+<link rel="stylesheet" href="{% static 'algo/lib/codemirror-5.3/lib/codemirror.css' %}" />
+<script src="{% static 'algo/lib/codemirror-5.3/mode/clike/clike.js' %}"></script>
+<script src="{% static 'algo/lib/codemirror-5.3/addon/scroll/simplescrollbars.js' %}"></script>
+<link rel="stylesheet" href="{% static 'algo/lib/codemirror-5.3/addon/scroll/simplescrollbars.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="navigation_box">
+    &laquo; <a href="{% url 'algo:index' %}">Scoreboard</a>
+</div>
+
+<div class="check_content">
+    <div class="check_elapsed_time">Time: <span class="stop_watch"></span></div>
+    <h2>Checking {{ algorithm.name }}</h2>
+
+    <form class="check_code_form" action="{% url 'algo:submit' algorithm_slug=algorithm.slug %}" method="post">
+        {% csrf_token %}
+        <div class="check_code_area">
+            <textarea id="source_code" name="source_code">{{ given_code }}</textarea>
+        </div>
+        <input type="hidden" id="elapsed_seconds_input" name="elapsed_seconds" value="" />
+        <input type="submit" value="Submit" />
+    </form>
+</div>
+
+<script type="text/javascript">
+    var BEFORE_REGION_LINES = {{ before_region_lines }};
+    var AFTER_REGION_LINES = {{ after_region_lines }};
+
+    function fixSelectionPos(editor, pos) {
+        if (pos.line < BEFORE_REGION_LINES) {
+            pos.line = BEFORE_REGION_LINES;
+            pos.ch = 0;
+        } else
+        if (pos.line >= editor.lineCount() - AFTER_REGION_LINES - 1) {
+            pos.line = editor.lineCount() - AFTER_REGION_LINES - 2;
+            pos.ch = editor.getLine(pos.line).length;
+        }
+    }
+
+    function fillFrozenLines(editor) {
+        for (var i = 0; i < BEFORE_REGION_LINES; i++)
+            editor.addLineClass(i, 'background', 'line_predefined');
+        var lineCount = editor.lineCount();
+        for (var i = lineCount - AFTER_REGION_LINES - 1; i < lineCount; i++)
+            editor.addLineClass(i, 'background', 'line_predefined');
+    }
+
+    function resizeEditor(editor) {
+        var width = 800;
+        $('.check_code_area').hide();
+        var height = $(window).height() - $('body').height() - 40;
+        $('.check_code_area').show();
+        editor.setSize(width, height);
+        return {width: width, height: height};
+    }
+
+    function showEditor() {
+        var editor = CodeMirror.fromTextArea(
+            $('#source_code')[0], {
+                mode: "text/x-c++src",
+
+                lineNumbers: true,
+                lineWrapping: true,
+                matchBrackets: true,
+                showCursorWhenSelecting: true,
+
+                scrollbarStyle: 'simple',
+
+                indentUnit: 4,
+                indentWithTabs: true,
+            }
+        );
+
+        editor.on('beforeChange', function (instance, change) {
+            var lineNo = change.from.line;
+            if (
+                lineNo < BEFORE_REGION_LINES ||
+                lineNo >= editor.lineCount() - AFTER_REGION_LINES - 1
+            )
+                change.cancel();
+        });
+        editor.on('beforeSelectionChange', function (instance, change) {
+            for (var i = 0; i < change.ranges.length; i++) {
+                var range = change.ranges[i];
+                fixSelectionPos(editor, range.anchor);
+                fixSelectionPos(editor, range.head);
+            }
+            change.update(change.ranges);
+        });
+
+        fillFrozenLines(editor);
+
+        var editorHeight = resizeEditor(editor).height;
+        $(window).resize(function () {
+            resizeEditor(editor);
+        });
+
+        editor.focus();
+        var curLineLength = editor.getLine(BEFORE_REGION_LINES).length;
+        editor.setSelection(
+            {line: BEFORE_REGION_LINES, ch: curLineLength},
+            {line: BEFORE_REGION_LINES, ch: curLineLength}
+        );
+        var scrollTop = (BEFORE_REGION_LINES + 3) *
+                editor.defaultTextHeight() - editorHeight / 2;
+        editor.scrollTo(0, scrollTop);
+    }
+
+
+    function zfill(str, width) {
+        while (str.length < width)
+            str = '0' + str;
+        return str;
+    }
+
+    function setupStopWatch() {
+        var MSEC_PER_SEC = 1000;
+        var startMsecs = Date.now();
+
+        function showTime() {
+            var elapsedMsecs = Date.now() - startMsecs;
+            var totalSeconds = Math.round(elapsedMsecs / MSEC_PER_SEC);
+            $('#elapsed_seconds_input').val(totalSeconds);
+            var minutes = Math.round(totalSeconds / 60).toString();
+            var seconds = (totalSeconds % 60).toString();
+            var label = zfill(minutes, 2) + ':' + zfill(seconds, 2);
+            $('.stop_watch').text(label);
+        }
+
+        showTime();
+        setInterval(showTime, MSEC_PER_SEC);
+    }
+
+
+    $(function () {
+        showEditor();
+        setupStopWatch();
+    });
+</script>
+{% endblock %}

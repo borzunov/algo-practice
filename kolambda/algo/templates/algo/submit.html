@@ -1,0 +1,118 @@
+{% extends "algo/base.html" %}
+{% load staticfiles %}
+
+{% block title %}Submit {{ algorithm.name }} - {{ block.super }}{% endblock %}
+
+{% block includes %}
+<script src="{% static 'algo/lib/codemirror-5.3/lib/codemirror.js' %}"></script>
+<link rel="stylesheet" href="{% static 'algo/lib/codemirror-5.3/lib/codemirror.css' %}" />
+<script src="{% static 'algo/lib/codemirror-5.3/mode/clike/clike.js' %}"></script>
+<script src="{% static 'algo/lib/codemirror-5.3/addon/scroll/simplescrollbars.js' %}"></script>
+<link rel="stylesheet" href="{% static 'algo/lib/codemirror-5.3/addon/scroll/simplescrollbars.css' %}" />
+
+<script type="text/javascript" src="{% static 'algo/lib/mergely-3.3.9/lib/mergely.js' %}"></script>
+<link rel="stylesheet" href="{% static 'algo/lib/mergely-3.3.9/lib/mergely.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="navigation_box">
+    &laquo; <a href="{% url 'algo:index' %}">Scoreboard</a>
+    &laquo; <a href="{% url 'algo:check' algorithm_slug=algorithm.slug %}">Check {{ algorithm.name }}</a>
+</div>
+
+<div class="submit_content">
+    <h3>Comparing {{ algorithm.name }}</h3>
+
+    <div class="match_description">
+        <div class="match_percents">Match: {{ score|floatformat:1 }}%</div>
+        <div class="match_comment">
+            * &ndash; Levenshtein distance by tokens: {{ distance }} (max {{ max_distance }})
+        </div>
+        <div class="submit_elapsed_time">Time: {{ elapsed_seconds }} seconds</div>
+    </div>
+
+    <div class="match_continue">
+        <a class="match_continue_link" href="{% url 'algo:check' algorithm_slug=algorithm.slug %}">Try again</a>
+        <a class="match_continue_link" href="{% url 'algo:check_random' %}">Try random</a>
+    </div>
+    <div class="match_expand">
+        <input type="submit" value="Expand code" />
+    </div>
+
+    <div class="submit_code_area">
+        <div id="compare"><div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var BEFORE_REGION_LINES = {{ before_region_lines }};
+    var AFTER_REGION_LINES = {{ after_region_lines }};
+
+    function fillFrozenLines(editor) {
+        for (var i = 0; i < BEFORE_REGION_LINES; i++)
+            editor.addLineClass(i, 'background', 'line_predefined');
+        var lineCount = editor.lineCount();
+        for (var i = lineCount - AFTER_REGION_LINES - 1; i < lineCount; i++)
+            editor.addLineClass(i, 'background', 'line_predefined');
+    }
+
+    function resizeDiff(diff) {
+        var width = 1000;
+        $('.submit_code_area').hide();
+        var height = $(window).height() - $('body').height() - 40;
+        $('.submit_code_area')
+            .width(width)
+            .height(height)
+            .show();
+        diff.mergely('resize');
+        return {width: width, height: height};
+    }
+
+    function showDiff() {
+    	$('#compare').mergely({
+            width: 'auto',
+            height: 'auto',
+
+    		lhs: function(setValue) {
+    			setValue('{{ written_code|escapejs }}\n');
+    		},
+    		rhs: function(setValue) {
+                setValue('{{ expected_code|escapejs }}\n');
+    		},
+
+    		cmsettings: {
+                readOnly: true,
+
+                mode: "text/x-c++src",
+
+                lineNumbers: true,
+                lineWrapping: true,
+                matchBrackets: true,
+                showCursorWhenSelecting: true,
+
+                scrollbarStyle: 'simple',
+            },
+    	});
+
+        function fillFrozenLinesCallback(instance) {
+            fillFrozenLines(instance);
+        }
+
+        var left_editor = $('#compare').mergely('cm', 'lhs');
+        var right_editor = $('#compare').mergely('cm', 'rhs');
+        fillFrozenLines(left_editor);
+        fillFrozenLines(right_editor);
+        left_editor.on("update", fillFrozenLinesCallback);
+        right_editor.on("update", fillFrozenLinesCallback);
+
+        resizeDiff($('#compare'));
+        $(window).resize(function () {
+            resizeDiff($('#compare'));
+        });
+    }
+
+    $(function () {
+        showDiff();
+    });
+</script>
+{% endblock %}

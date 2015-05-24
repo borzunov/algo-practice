@@ -1,0 +1,57 @@
+{% extends "algo/base.html" %}
+{% load staticfiles %}
+{% load upto_filter %}
+
+{% block title %}Scoreboard - {{ block.super }}{% endblock %}
+
+{% block content %}
+<h3>Scoreboard:</h3>
+
+<table class="scoreboard">
+    <thead>
+        <tr>
+            <th>
+                Select algorithm
+                <div class="check_random_text">
+                    (or <a href="{% url 'algo:check_random' %}"  title="Try to write random algorithm">try random</a>):
+                </div>
+            </th>
+            {% for author in authors %}
+            {% if author.username == request.user.username %}
+            <th class="current_user">
+            {% else %}
+            <th>
+            {% endif %}
+                <a href="{% url 'algo:history' author.username %}" title="All submits by {{ author.username }}">
+                    {{ author.username }}
+                </a>
+            </th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in scoreboard %}
+        <tr>
+            <td class="algorithm_cell">
+                <a href="{% url 'algo:check' algorithm_slug=row.algorithm.slug %}" title="Try to write {{ row.algorithm.name }}">
+                    {{ row.algorithm.name }}
+                </a>
+            </td>
+            {% for cell in row.submits %}
+            {% if cell.submit %}
+            <td class="submits_cell last_submit_{{ cell.submit_kind }}">
+                <div class="last_submit_score" title="Match score of last submit">{{ cell.submit.score|floatformat:1 }}%</div>
+                <div class="last_submit_elapsed_seconds" title="Elapsed time of last submit">{{ cell.submit.elapsed_seconds }} sec</div>
+                <a class="history_link" href="{% url 'algo:history' author_username=cell.author.username algorithm_slug=row.algorithm.slug %}">
+                    <div class="last_submit_time">{{ cell.submit.date|timesince|upto:"," }} ago</div>
+                </a>
+            </td>
+            {% else %}
+            <td class="submits_cell"></td>
+            {% endif %}
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

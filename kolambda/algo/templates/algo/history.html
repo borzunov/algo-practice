@@ -1,0 +1,56 @@
+{% extends "algo/base.html" %}
+{% load staticfiles %}
+
+{% block title %}
+    Submits
+    {% if algorithm %}
+    of {{ algorithm.name }}
+    {% endif %}
+    by {{ author.username }} - {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="navigation_box">
+    &laquo; <a href="{% url 'algo:index' %}">Scoreboard</a>
+</div>
+
+<h3>
+    Submits
+    {% if algorithm %}
+    of <i>{{ algorithm.name }}</i>
+    {% endif %}
+    by <i>{{ author.username }}</i>:
+</h3>
+
+<p>
+    Total {{ submits|length }} submit{{ submits|length|pluralize }},
+    {{ full_matches_count }} full match{{ full_matches_count|pluralize:"es" }}.
+</p>
+
+{% if submits %}
+<table class="history_table">
+    <thead>
+        <th>Date</th>
+        <th>Author</th>
+        <th>Algorithm</th>
+        <th>Match score</th>
+        <th>Elapsed time</th>
+    </thead>
+    <tbody>
+        {% for submit in submits %}
+        <tr>
+            <td>
+                {{ submit.date|date:"H:m:s" }}<br />
+                {{ submit.date|date:"d M Y" }}
+            </td>
+            <td>{{ submit.author }}</td>
+            <td>{{ submit.algorithm }}</td>
+            <td>{{ submit.score|floatformat:1 }}%</td>
+            <td>{{ submit.elapsed_seconds }} sec</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</ul>
+{% endif %}
+{% endblock %}

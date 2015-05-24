@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>{% block title %}Algorithms Practice{% endblock %}</title>
+
+        {% load staticfiles %}
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+        {% block includes %}{% endblock %}
+        <link rel="stylesheet" href="{% static 'algo/style.css' %}">
+    </head>
+    <body>
+        <div class="account_bar">
+            <div class="account_info">
+                <b>{{ request.user.username }}</b> | <a href="{% url 'logout' %}">Log out</a>
+            </div>
+            <div class="site_title">Algorithms Practice</div>
+        </div>
+
+        <div class="content">
+        {% block content %}{% endblock %}
+        </div>
+    </body>
+</html>
