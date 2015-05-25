@@ -172,7 +172,7 @@ def history(request, author_username, algorithm_slug=None):
     else:
         algorithm = None
         submits = Submit.objects.filter(author=author)
-    submits = submits.order_by('-date')
+    submits = submits.order_by('-pk')
     full_matches_count = sum(1 for item in submits
                              if abs(item.score - 100) < EPS)
     return render(request, 'algo/history.html', {

@@ -48,6 +48,7 @@
         {% else %}
         <p><b>Author:</b> {{ submit.author.username }}</p>
         <p><b>Date:</b> {{ submit.date|date:"d M Y, H:m:s" }}</p>
+        <p><b>Language:</b> {{ submit.algorithm.language.name }}</p>
         {% endif %}
     </div>
 
@@ -97,7 +98,7 @@
         var written_code = '{{ submit.source_code|escapejs }}\n';
         var expected_code = '{{ expected_code|escapejs }}\n';
         var mergeView = CodeMirror.MergeView($('#compare')[0], {
-            mode: "text/x-c++src",
+            mode: "{{ submit.algorithm.language.mime_type|escapejs }}",
 
             lineNumbers: true,
             lineWrapping: true,

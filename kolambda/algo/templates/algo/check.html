@@ -65,7 +65,7 @@
     function showEditor() {
         var editor = CodeMirror.fromTextArea(
             $('#source_code')[0], {
-                mode: "text/x-c++src",
+                mode: "{{ algorithm.language.mime_type|escapejs }}",
 
                 lineNumbers: true,
                 lineWrapping: true,
