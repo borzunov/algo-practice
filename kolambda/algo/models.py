@@ -5,16 +5,11 @@ from django.template.defaultfilters import slugify
 
 class Algorithm(models.Model):
     name = models.CharField(max_length=255)
-    slug = models.SlugField(max_length=60, blank=True)
+    slug = models.SlugField(max_length=60)
     source_code = models.TextField()
 
     def __str__(self):
         return self.name
-
-    def save(self, *args, **kwargs):
-        self.slug = slugify(self.name)
-        # TODO: Unique and safe (non-empty) slugs
-        super(Algorithm, self).save(*args, **kwargs)
 
 
 class Submit(models.Model):
