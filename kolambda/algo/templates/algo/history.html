@@ -12,6 +12,11 @@
 {% block content %}
 <div class="navigation_box">
     &laquo; <a href="{% url 'algo:index' %}">Scoreboard</a>
+    {% if algorithm %}
+    &laquo; <a href="{% url 'algo:history' author_username=author.username %}">
+        {{ author.username }}
+    </a>
+    {% endif %}
 </div>
 
 <h3>
@@ -30,6 +35,7 @@
 {% if submits %}
 <table class="history_table">
     <thead>
+        <th>ID</th>
         <th>Date</th>
         <th>Author</th>
         <th>Algorithm</th>
@@ -39,6 +45,11 @@
     <tbody>
         {% for submit in submits %}
         <tr>
+            <td>
+                <a href="{% url 'algo:show_submit' submit.author.username submit.algorithm.slug submit.id %}">
+                    {{ submit.id }}
+                </a>
+            </td>
             <td>
                 {{ submit.date|date:"H:m:s" }}<br />
                 {{ submit.date|date:"d M Y" }}

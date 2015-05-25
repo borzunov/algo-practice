@@ -1,7 +1,7 @@
 {% extends "algo/base.html" %}
 {% load staticfiles %}
 
-{% block title %}Submit {{ algorithm.name }} - {{ block.super }}{% endblock %}
+{% block title %}Submit #{{ submit.id }} - {{ block.super }}{% endblock %}
 
 {% block includes %}
 <script src="{% static 'algo/lib/codemirror-5.3/lib/codemirror.js' %}"></script>
@@ -18,23 +18,37 @@
 {% block content %}
 <div class="navigation_box">
     &laquo; <a href="{% url 'algo:index' %}">Scoreboard</a>
-    &laquo; <a href="{% url 'algo:check' algorithm_slug=algorithm.slug %}">Check {{ algorithm.name }}</a>
+    {% if new_submit %}
+    &laquo; <a href="{% url 'algo:check' algorithm_slug=submit.algorithm.slug %}">Check {{ submit.algorithm.name }}</a>
+    {% else %}
+    &laquo; <a href="{% url 'algo:history' author_username=submit.author.username %}">
+        {{ submit.author.username }}
+    </a>
+    &laquo; <a href="{% url 'algo:history' author_username=submit.author.username algorithm_slug=submit.algorithm.slug %}">
+        {{ submit.algorithm.name }}
+    </a>
+    {% endif %}
 </div>
 
 <div class="submit_content">
-    <h3>Comparing {{ algorithm.name }}</h3>
+    <h3>Comparing {{ submit.algorithm.name }}</h3>
 
     <div class="match_description">
         <div class="match_percents">Match: {{ score|floatformat:1 }}%</div>
         <div class="match_comment">
             * &ndash; Levenshtein distance by tokens: {{ distance }} (max {{ max_distance }})
         </div>
-        <div class="submit_elapsed_time">Time: {{ elapsed_seconds }} seconds</div>
+        <div class="submit_elapsed_time">Time: {{ submit.elapsed_seconds }} seconds</div>
     </div>
 
     <div class="match_continue">
-        <a class="match_continue_link" href="{% url 'algo:check' algorithm_slug=algorithm.slug %}">Try again</a>
-        <a class="match_continue_link" href="{% url 'algo:check_random' %}">Try random</a>
+        {% if new_submit %}
+        <a href="{% url 'algo:check' algorithm_slug=submit.algorithm.slug %}">Try again</a>
+        <a href="{% url 'algo:check_random' %}">Try random</a>
+        {% else %}
+        <p><b>Author:</b> {{ submit.author.username }}</p>
+        <p><b>Date:</b> {{ submit.date|date:"d M Y, H:m:s" }}</p>
+        {% endif %}
     </div>
 
     <div class="submit_code_area">
@@ -80,7 +94,7 @@
     }
 
     function showMergeView() {
-        var written_code = '{{ written_code|escapejs }}\n';
+        var written_code = '{{ submit.source_code|escapejs }}\n';
         var expected_code = '{{ expected_code|escapejs }}\n';
         var mergeView = CodeMirror.MergeView($('#compare')[0], {
             mode: "text/x-c++src",

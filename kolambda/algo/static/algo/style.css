@@ -156,7 +156,7 @@ h3 {
     margin: 15px;
 }
 
-.match_continue_link {
+.match_continue a, .match_continue p {
     margin: 5px;
 }
 

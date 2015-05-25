@@ -128,7 +128,7 @@ def calculate_score(written_fragment, expected_fragment):
 
 
 @login_required
-def submit(request, algorithm_slug):
+def create_submit(request, algorithm_slug):
     try:
         written_code = request.POST['source_code'].rstrip()
         #  Set required newline character
@@ -144,22 +144,21 @@ def submit(request, algorithm_slug):
     score, distance, max_distance = calculate_score(
         written_fragment, expected_fragment)
 
-    Submit.objects.create(
+    submit = Submit.objects.create(
         algorithm=algorithm,
         author=request.user,
         elapsed_seconds=elapsed_seconds,
         source_code=written_code,
         score=score)
     return render(request, 'algo/submit.html', {
-        'algorithm': algorithm,
+        'submit': submit,
         'before_region_lines': before_region_lines,
         'after_region_lines': after_region_lines,
-        'elapsed_seconds': elapsed_seconds,
         'expected_code': expected_code,
+        'new_submit': True,
         'score': score,
         'distance': distance,
         'max_distance': max_distance,
-        'written_code': written_code,
     })
 
 
@@ -181,4 +180,30 @@ def history(request, author_username, algorithm_slug=None):
         'author': author,
         'full_matches_count': full_matches_count,
         'submits': submits,
+    })
+
+
+@login_required
+def show_submit(request, author_username, algorithm_slug, submit_id):
+    author = get_object_or_404(User,
+                               username=author_username, groups__name='algo')
+    algorithm = get_object_or_404(Algorithm, slug=algorithm_slug)
+    submit = get_object_or_404(Submit, author=author, algorithm=algorithm,
+                               id=submit_id)
+
+    (before_region_lines, after_region_lines, expected_code,
+        written_fragment, expected_fragment) = extract_code_parts(
+        submit.source_code, algorithm.source_code)
+    score, distance, max_distance = calculate_score(
+        written_fragment, expected_fragment)
+
+    return render(request, 'algo/submit.html', {
+        'submit': submit,
+        'before_region_lines': before_region_lines,
+        'after_region_lines': after_region_lines,
+        'expected_code': expected_code,
+        'new_submit': False,
+        'score': score,
+        'distance': distance,
+        'max_distance': max_distance,
     })

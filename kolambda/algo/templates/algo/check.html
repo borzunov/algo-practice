@@ -20,7 +20,7 @@
     <div class="check_elapsed_time">Time: <span class="stop_watch"></span></div>
     <h2>Checking {{ algorithm.name }}</h2>
 
-    <form class="check_code_form" action="{% url 'algo:submit' algorithm_slug=algorithm.slug %}" method="post">
+    <form class="check_code_form" action="{% url 'algo:create_submit' algorithm_slug=algorithm.slug %}" method="post">
         {% csrf_token %}
         <div class="check_code_area">
             <textarea id="source_code" name="source_code">{{ given_code }}</textarea>
