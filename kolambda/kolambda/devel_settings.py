@@ -105,5 +105,7 @@ STATIC_URL = '/static/'
 
 
 LOGIN_REDIRECT_URL = 'algo:index'
+
 LOGIN_URL = 'login'
+
 LOGOUT_URL = 'logout'
