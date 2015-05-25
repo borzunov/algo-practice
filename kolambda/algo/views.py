@@ -131,6 +131,8 @@ def calculate_score(written_fragment, expected_fragment):
 def submit(request, algorithm_slug):
     try:
         written_code = request.POST['source_code'].rstrip()
+        #  Set required newline character
+        written_code = '\n'.join(written_code.splitlines())
         elapsed_seconds = int(request.POST['elapsed_seconds'])
     except (KeyError, ValueError):
         return redirect('algo:check', algorithm_slug=algorithm_slug)

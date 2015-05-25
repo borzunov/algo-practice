@@ -10,8 +10,9 @@
 <script src="{% static 'algo/lib/codemirror-5.3/addon/scroll/simplescrollbars.js' %}"></script>
 <link rel="stylesheet" href="{% static 'algo/lib/codemirror-5.3/addon/scroll/simplescrollbars.css' %}" />
 
-<script type="text/javascript" src="{% static 'algo/lib/mergely-3.3.9/lib/mergely.js' %}"></script>
-<link rel="stylesheet" href="{% static 'algo/lib/mergely-3.3.9/lib/mergely.css' %}" />
+<script src="//cdnjs.cloudflare.com/ajax/libs/diff_match_patch/20121119/diff_match_patch.js"></script>
+<link rel="stylesheet" href="{% static 'algo/lib/codemirror-5.3/addon/merge/merge.css' %}" />
+<script src="{% static 'algo/lib/codemirror-5.3/addon/merge/merge.js' %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -35,9 +36,6 @@
         <a class="match_continue_link" href="{% url 'algo:check' algorithm_slug=algorithm.slug %}">Try again</a>
         <a class="match_continue_link" href="{% url 'algo:check_random' %}">Try random</a>
     </div>
-    <div class="match_expand">
-        <input type="submit" value="Expand code" />
-    </div>
 
     <div class="submit_code_area">
         <div id="compare"><div>
@@ -56,63 +54,63 @@
             editor.addLineClass(i, 'background', 'line_predefined');
     }
 
-    function resizeDiff(diff) {
-        var width = 1000;
-        $('.submit_code_area').hide();
-        var height = $(window).height() - $('body').height() - 40;
-        $('.submit_code_area')
-            .width(width)
-            .height(height)
-            .show();
-        diff.mergely('resize');
-        return {width: width, height: height};
+    function mergeViewHeight(mergeView) {
+        function editorHeight(editor) {
+            if (!editor)
+                return 0;
+            return editor.getScrollInfo().height;
+        }
+        return Math.max(
+            editorHeight(mergeView.leftOriginal()),
+            editorHeight(mergeView.editor()),
+            editorHeight(mergeView.rightOriginal())
+        );
     }
 
-    function showDiff() {
-    	$('#compare').mergely({
-            width: 'auto',
-            height: 'auto',
+    function resizeMergeView(mergeView) {
+        var codeElements = $('.CodeMirror-code');
+        var newHeight = Math.max(
+            codeElements.eq(0).height(),
+            codeElements.eq(1).height()
+        ) + 15;
+        mergeView.leftOriginal().setSize(null, newHeight);
+        mergeView.editor().setSize(null, newHeight);
 
-    		lhs: function(setValue) {
-    			setValue('{{ written_code|escapejs }}\n');
-    		},
-    		rhs: function(setValue) {
-                setValue('{{ expected_code|escapejs }}\n');
-    		},
+        // mergeView.wrap.style.height = newHeight + "px";
+    }
 
-    		cmsettings: {
-                readOnly: true,
+    function showMergeView() {
+        var written_code = '{{ written_code|escapejs }}\n';
+        var expected_code = '{{ expected_code|escapejs }}\n';
+        var mergeView = CodeMirror.MergeView($('#compare')[0], {
+            mode: "text/x-c++src",
 
-                mode: "text/x-c++src",
+            lineNumbers: true,
+            lineWrapping: true,
+            matchBrackets: true,
+            showCursorWhenSelecting: true,
 
-                lineNumbers: true,
-                lineWrapping: true,
-                matchBrackets: true,
-                showCursorWhenSelecting: true,
+            readOnly: true,
+            viewportMargin: Infinity,
 
-                scrollbarStyle: 'simple',
-            },
-    	});
+            revertButtons: false,
+            connect: 'align',
+            collapseIdentical: 5,
 
-        function fillFrozenLinesCallback(instance) {
-            fillFrozenLines(instance);
-        }
+            origLeft: written_code,
+            value: expected_code,
+        });
 
-        var left_editor = $('#compare').mergely('cm', 'lhs');
-        var right_editor = $('#compare').mergely('cm', 'rhs');
-        fillFrozenLines(left_editor);
-        fillFrozenLines(right_editor);
-        left_editor.on("update", fillFrozenLinesCallback);
-        right_editor.on("update", fillFrozenLinesCallback);
+        fillFrozenLines(mergeView.leftOriginal());
+        fillFrozenLines(mergeView.editor());
 
-        resizeDiff($('#compare'));
         $(window).resize(function () {
-            resizeDiff($('#compare'));
+            resizeMergeView(mergeView);
         });
     }
 
     $(function () {
-        showDiff();
+        showMergeView();
     });
 </script>
 {% endblock %}

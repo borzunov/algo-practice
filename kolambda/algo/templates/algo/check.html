@@ -109,8 +109,8 @@
             {line: BEFORE_REGION_LINES, ch: curLineLength},
             {line: BEFORE_REGION_LINES, ch: curLineLength}
         );
-        var scrollTop = (BEFORE_REGION_LINES + 3) *
-                editor.defaultTextHeight() - editorHeight / 2;
+        var scrollTop = editor.heightAtLine(BEFORE_REGION_LINES + 4, 'local')
+                - editorHeight / 2;
         editor.scrollTo(0, scrollTop);
     }
 
