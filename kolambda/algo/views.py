@@ -16,9 +16,9 @@ EPS = 1e-7
 def get_submit_kind(item):
     if item is None:
         return None
-    if item.score < 90 - EPS:
+    if item.score < 80 - EPS:
         return 'bad'
-    if item.score < 100 - EPS:
+    if item.score < 95 - EPS:
         return 'good'
     return 'perfect'
 
