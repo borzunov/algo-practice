@@ -55,13 +55,14 @@
 
 <script type="text/javascript">
     var BEFORE_REGION_LINES = {{ editable_region.lines_before }};
-    var AFTER_REGION_LINES = {{ editable_region.lines_after }};
+    var AFTER_REGION_LINES = {{ editable_region.lines_after }} + 1;
+        //  Because a newline will be added
 
     function fillFrozenLines(editor) {
         for (var i = 0; i < BEFORE_REGION_LINES; i++)
             editor.addLineClass(i, 'background', 'line_predefined');
         var lineCount = editor.lineCount();
-        for (var i = lineCount - AFTER_REGION_LINES - 1; i < lineCount; i++)
+        for (var i = lineCount - AFTER_REGION_LINES; i < lineCount; i++)
             editor.addLineClass(i, 'background', 'line_predefined');
     }
 

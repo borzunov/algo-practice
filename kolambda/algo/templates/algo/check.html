@@ -23,7 +23,8 @@
     <form class="check_code_form" action="{% url 'algo:create_submit' algorithm_slug=algorithm.slug %}" method="post">
         {% csrf_token %}
         <div class="check_code_area">
-            <textarea id="source_code" name="source_code">{{ given_code }}</textarea>
+            <textarea id="source_code" name="source_code">{{ given_code }}
+            </textarea>
         </div>
         <input type="hidden" id="elapsed_seconds_input" name="elapsed_seconds" value="" />
         <input type="submit" value="Submit" />
@@ -32,7 +33,8 @@
 
 <script type="text/javascript">
     var BEFORE_REGION_LINES = {{ editable_region.lines_before }};
-    var AFTER_REGION_LINES = {{ editable_region.lines_after }};
+    var AFTER_REGION_LINES = {{ editable_region.lines_after }} + 1;
+        //  Because a newline will be added
 
     function fixSelectionPos(editor, pos) {
         if (pos.line < BEFORE_REGION_LINES) {
