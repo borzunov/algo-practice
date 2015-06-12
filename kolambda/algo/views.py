@@ -1,3 +1,5 @@
+import re
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
 from django.http import Http404
@@ -61,11 +63,11 @@ def check(request, algorithm_slug):
     algorithm = get_object_or_404(Algorithm, slug=algorithm_slug)
 
     region = EditableSourceRegion(algorithm.source_code)
-    given_code_lines = (
-        region.lines[:region.lines_before] +
-        [''] +
-        region.lines[-region.lines_after:])
-    given_code = '\n'.join(given_code_lines)
+    given_code = re.sub(
+        r'// *\[StartCodeRegion\].*// *\[EndCodeRegion\]', r'',
+        algorithm.source_code.rstrip(), flags=re.DOTALL)
+        #  The regexp preserves an indent at the beginning of
+        #  the created empty line
 
     return render(request, 'algo/check.html', {
         'algorithm': algorithm,
