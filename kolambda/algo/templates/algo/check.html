@@ -31,16 +31,16 @@
 </div>
 
 <script type="text/javascript">
-    var BEFORE_REGION_LINES = {{ before_region_lines }};
-    var AFTER_REGION_LINES = {{ after_region_lines }};
+    var BEFORE_REGION_LINES = {{ editable_region.lines_before }};
+    var AFTER_REGION_LINES = {{ editable_region.lines_after }};
 
     function fixSelectionPos(editor, pos) {
         if (pos.line < BEFORE_REGION_LINES) {
             pos.line = BEFORE_REGION_LINES;
             pos.ch = 0;
         } else
-        if (pos.line >= editor.lineCount() - AFTER_REGION_LINES - 1) {
-            pos.line = editor.lineCount() - AFTER_REGION_LINES - 2;
+        if (pos.line >= editor.lineCount() - AFTER_REGION_LINES) {
+            pos.line = editor.lineCount() - AFTER_REGION_LINES - 1;
             pos.ch = editor.getLine(pos.line).length;
         }
     }
@@ -49,7 +49,7 @@
         for (var i = 0; i < BEFORE_REGION_LINES; i++)
             editor.addLineClass(i, 'background', 'line_predefined');
         var lineCount = editor.lineCount();
-        for (var i = lineCount - AFTER_REGION_LINES - 1; i < lineCount; i++)
+        for (var i = lineCount - AFTER_REGION_LINES; i < lineCount; i++)
             editor.addLineClass(i, 'background', 'line_predefined');
     }
 
@@ -84,7 +84,7 @@
             var lineNo = change.from.line;
             if (
                 lineNo < BEFORE_REGION_LINES ||
-                lineNo >= editor.lineCount() - AFTER_REGION_LINES - 1
+                lineNo >= editor.lineCount() - AFTER_REGION_LINES
             )
                 change.cancel();
         });

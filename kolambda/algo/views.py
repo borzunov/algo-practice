@@ -1,12 +1,9 @@
-import math
-import re
-
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
-from . import code_compare
+from .code_processing import EditableSourceRegion, CodeComparer
 from .models import Algorithm, Submit
 
 
@@ -50,23 +47,6 @@ def index(request):
     })
 
 
-def find_fragment_tags(algorithm_source):
-    algorithm_source_lines = algorithm_source.splitlines()
-    before_region_lines = None
-    after_region_lines = None
-    for line_index, line in enumerate(algorithm_source_lines):
-        if re.search(r'^[ \t]*// *\[StartCodeRegion\]', line):
-            before_region_lines = line_index
-        elif (after_region_lines is None and
-              re.search(r'^[ \t]*// *\[EndCodeRegion\]', line)):
-            after_region_lines = len(algorithm_source_lines) - line_index - 1
-    if before_region_lines is None:
-        raise ValueError('[StartCodeRegion] tag not found')
-    if after_region_lines is None:
-        raise ValueError('[EndCodeRegion] tag not found')
-    return algorithm_source_lines, before_region_lines, after_region_lines
-
-
 @login_required
 def check(request, algorithm_slug=None, algorithm_random=False):
     if algorithm_slug is not None:
@@ -79,52 +59,18 @@ def check(request, algorithm_slug=None, algorithm_random=False):
     else:
         raise ValueError('You must select algorithm or specify random mode')
 
-    given_code = re.sub(
-        r'// *\[StartCodeRegion\].*// *\[EndCodeRegion\]', r'',
-        algorithm.source_code, flags=re.DOTALL
-    )
-    _, before_region_lines, after_region_lines = find_fragment_tags(
-        algorithm.source_code)
+    region = EditableSourceRegion(algorithm.source_code)
+    given_code_lines = (
+        region.lines[:region.lines_before] +
+        [''] +
+        region.lines[-region.lines_after:])
+    given_code = '\n'.join(given_code_lines)
+
     return render(request, 'algo/check.html', {
         'algorithm': algorithm,
-        'before_region_lines': before_region_lines,
-        'after_region_lines': after_region_lines,
         'given_code': given_code,
+        'editable_region': region,
     })
-
-
-def extract_code_parts(written_code, algorithm_source):
-    (algorithm_source_lines, before_region_lines,
-        after_region_lines) = find_fragment_tags(algorithm_source)
-    expected_fragment_lines = algorithm_source_lines[before_region_lines + 1:
-                                                     -(after_region_lines + 1)]
-    expected_code_lines = (
-        algorithm_source_lines[:before_region_lines] +
-        expected_fragment_lines +
-        algorithm_source_lines[-after_region_lines:]
-    )
-    expected_fragment = '\n'.join(expected_fragment_lines)
-    expected_code = '\n'.join(expected_code_lines)
-
-    written_code_lines = written_code.splitlines()
-    written_fragment_lines = written_code_lines[before_region_lines:
-                                                -after_region_lines]
-    written_code = '\n'.join(written_code_lines)
-    written_fragment = '\n'.join(written_fragment_lines)
-
-    return (before_region_lines, after_region_lines,
-            expected_code, written_fragment, expected_fragment)
-
-
-def calculate_score(written_fragment, expected_fragment):
-    written_tokens = code_compare.split_to_tokens(written_fragment)
-    expected_tokens = code_compare.split_to_tokens(expected_fragment)
-    distance = code_compare.levenshtein_distance(
-        written_tokens, expected_tokens)
-    max_distance = max(len(written_tokens), len(expected_tokens))
-    score = (1.0 - distance / max_distance) * 100
-    score = math.floor(score * 10) / 10
-    return score, distance, max_distance
 
 
 @login_required
@@ -138,16 +84,14 @@ def create_submit(request, algorithm_slug):
         return redirect('algo:check', algorithm_slug=algorithm_slug)
     algorithm = get_object_or_404(Algorithm, slug=algorithm_slug)
 
-    written_fragment, expected_fragment = extract_code_parts(
-        written_code, algorithm.source_code)[-2:]
-    score = calculate_score(written_fragment, expected_fragment)[0]
-
+    comparer = CodeComparer(written_code, algorithm.source_code)
     submit = Submit.objects.create(
         algorithm=algorithm,
         author=request.user,
         elapsed_seconds=elapsed_seconds,
         source_code=written_code,
-        score=score)
+        score=comparer.score)
+
     return redirect('algo:show_new_submit',
                     author_username=request.user.username,
                     algorithm_slug=algorithm.slug, submit_id=submit.id)
@@ -181,19 +125,11 @@ def show_submit(request, author_username, algorithm_slug, submit_id,
     submit = get_object_or_404(Submit, author=author, algorithm=algorithm,
                                id=submit_id)
 
-    (before_region_lines, after_region_lines, expected_code,
-        written_fragment, expected_fragment) = extract_code_parts(
-        submit.source_code, algorithm.source_code)
-    score, distance, max_distance = calculate_score(
-        written_fragment, expected_fragment)
+    comparer = CodeComparer(submit.source_code, algorithm.source_code)
 
     return render(request, 'algo/submit.html', {
-        'submit': submit,
-        'before_region_lines': before_region_lines,
-        'after_region_lines': after_region_lines,
-        'expected_code': expected_code,
+        'comparer': comparer,
+        'editable_region': comparer.editable_region,
         'new_submit': new_submit,
-        'score': score,
-        'distance': distance,
-        'max_distance': max_distance,
+        'submit': submit,
     })
