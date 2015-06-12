@@ -2,9 +2,13 @@ import math
 import re
 
 
+def split_to_lines(code):
+    return [line.rstrip() for line in code.splitlines()]
+
+
 class EditableSourceRegion:
     def __init__(self, algorithm_source):
-        self.lines = algorithm_source.splitlines()
+        self.lines = split_to_lines(algorithm_source)
         lines_before = None
         lines_after = None
         for line_index, line in enumerate(self.lines):
@@ -58,7 +62,7 @@ class CodeComparer:
                                                -(region.lines_after + 1)]
         self.expected_fragment = '\n'.join(expected_fragment_lines)
 
-        written_code_lines = submit_source.splitlines()
+        written_code_lines = split_to_lines(submit_source)
         written_fragment_lines = written_code_lines[region.lines_before:
                                                     -region.lines_after]
         self.written_fragment = '\n'.join(written_fragment_lines)
@@ -69,6 +73,6 @@ class CodeComparer:
             region.lines[-region.lines_after:])
         self.expected_code = '\n'.join(expected_code_lines)
 
-        self.written_code = submit_source
+        self.written_code = '\n'.join(written_code_lines)
 
         self._calculate_score()
