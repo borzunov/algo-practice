@@ -48,16 +48,17 @@ def index(request):
 
 
 @login_required
-def check(request, algorithm_slug=None, algorithm_random=False):
-    if algorithm_slug is not None:
-        algorithm = get_object_or_404(Algorithm, slug=algorithm_slug)
-    elif algorithm_random:
-        try:
-            algorithm = Algorithm.objects.order_by('?')[0]
-        except IndexError:
-            raise Http404('No algorithms found')
-    else:
-        raise ValueError('You must select algorithm or specify random mode')
+def check_random(request):
+    try:
+        algorithm = Algorithm.objects.order_by('?')[0]
+    except IndexError:
+        raise Http404('No algorithms found')
+    return redirect('algo:check', algorithm_slug=algorithm.slug)
+
+
+@login_required
+def check(request, algorithm_slug):
+    algorithm = get_object_or_404(Algorithm, slug=algorithm_slug)
 
     region = EditableSourceRegion(algorithm.source_code)
     given_code_lines = (
