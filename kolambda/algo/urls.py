@@ -17,4 +17,7 @@ urlpatterns = [
     url(r'^history/(?P<author_username>[\w-]+)/(?P<algorithm_slug>[\w-]+)/' +
         r'(?P<submit_id>\d+)/$',
         views.show_submit, name='show_submit'),
+    url(r'^history/(?P<author_username>[\w-]+)/(?P<algorithm_slug>[\w-]+)/' +
+        r'(?P<submit_id>\d+)/new/$',
+        views.show_submit, {'new_submit': True}, name='show_new_submit'),
 ]

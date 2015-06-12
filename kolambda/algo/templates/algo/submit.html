@@ -18,16 +18,12 @@
 {% block content %}
 <div class="navigation_box">
     &laquo; <a href="{% url 'algo:index' %}">Scoreboard</a>
-    {% if new_submit %}
-    &laquo; <a href="{% url 'algo:check' algorithm_slug=submit.algorithm.slug %}">Check {{ submit.algorithm.name }}</a>
-    {% else %}
     &laquo; <a href="{% url 'algo:history' author_username=submit.author.username %}">
         {{ submit.author.username }}
     </a>
     &laquo; <a href="{% url 'algo:history' author_username=submit.author.username algorithm_slug=submit.algorithm.slug %}">
         {{ submit.algorithm.name }}
     </a>
-    {% endif %}
 </div>
 
 <div class="submit_content">

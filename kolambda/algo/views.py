@@ -31,10 +31,10 @@ def index(request):
     for algorithm in algorithms:
         submits = []
         for author in authors:
-            last_submit = Submit.objects\
-                .filter(algorithm=algorithm, author=author)\
-                .order_by('-date')\
-                .first()
+            last_submit = (Submit.objects
+                                 .filter(algorithm=algorithm, author=author)
+                                 .order_by('-date')
+                                 .first())
             submits.append({
                 'author': author,
                 'submit': last_submit,
@@ -138,11 +138,9 @@ def create_submit(request, algorithm_slug):
         return redirect('algo:check', algorithm_slug=algorithm_slug)
     algorithm = get_object_or_404(Algorithm, slug=algorithm_slug)
 
-    (before_region_lines, after_region_lines, expected_code,
-        written_fragment, expected_fragment) = extract_code_parts(
-        written_code, algorithm.source_code)
-    score, distance, max_distance = calculate_score(
-        written_fragment, expected_fragment)
+    written_fragment, expected_fragment = extract_code_parts(
+        written_code, algorithm.source_code)[-2:]
+    score = calculate_score(written_fragment, expected_fragment)[0]
 
     submit = Submit.objects.create(
         algorithm=algorithm,
@@ -150,22 +148,14 @@ def create_submit(request, algorithm_slug):
         elapsed_seconds=elapsed_seconds,
         source_code=written_code,
         score=score)
-    return render(request, 'algo/submit.html', {
-        'submit': submit,
-        'before_region_lines': before_region_lines,
-        'after_region_lines': after_region_lines,
-        'expected_code': expected_code,
-        'new_submit': True,
-        'score': score,
-        'distance': distance,
-        'max_distance': max_distance,
-    })
+    return redirect('algo:show_new_submit',
+                    author_username=request.user.username,
+                    algorithm_slug=algorithm.slug, submit_id=submit.id)
 
 
 @login_required
 def history(request, author_username, algorithm_slug=None):
-    author = get_object_or_404(User,
-                               username=author_username, groups__name='algo')
+    author = get_object_or_404(User, username=author_username)
     if algorithm_slug is not None:
         algorithm = get_object_or_404(Algorithm, slug=algorithm_slug)
         submits = Submit.objects.filter(author=author, algorithm=algorithm)
@@ -184,9 +174,9 @@ def history(request, author_username, algorithm_slug=None):
 
 
 @login_required
-def show_submit(request, author_username, algorithm_slug, submit_id):
-    author = get_object_or_404(User,
-                               username=author_username, groups__name='algo')
+def show_submit(request, author_username, algorithm_slug, submit_id,
+                new_submit=False):
+    author = get_object_or_404(User, username=author_username)
     algorithm = get_object_or_404(Algorithm, slug=algorithm_slug)
     submit = get_object_or_404(Submit, author=author, algorithm=algorithm,
                                id=submit_id)
@@ -202,7 +192,7 @@ def show_submit(request, author_username, algorithm_slug, submit_id):
         'before_region_lines': before_region_lines,
         'after_region_lines': after_region_lines,
         'expected_code': expected_code,
-        'new_submit': False,
+        'new_submit': new_submit,
         'score': score,
         'distance': distance,
         'max_distance': max_distance,
