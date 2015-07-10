@@ -111,4 +111,7 @@ LOGIN_URL = 'login'
 LOGOUT_URL = 'logout'
 
 
+CELERY_ACCEPT_CONTENT = ['pickle']
+
+
 TIMUS_JUDGE_ID = '187795NFAJLYT'

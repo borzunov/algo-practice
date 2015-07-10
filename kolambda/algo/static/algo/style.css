@@ -173,11 +173,12 @@ h3 {
 .match_comment {
     color: gray;
     font-size: 10pt;
+    margin-bottom: 7px;
 }
 
-.submit_elapsed_time {
-    margin-top: 7px;
+.submit_field {
     font-size: 14pt;
+    margin: 4px;
 }
 
 .submit_code_area {

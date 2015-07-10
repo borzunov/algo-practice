@@ -39,8 +39,9 @@
         <th>Date</th>
         <th>Author</th>
         <th>Algorithm</th>
+        <th>Verdict</th>
         <th>Match score</th>
-        <th>Elapsed time</th>
+        <th>Writing time</th>
     </thead>
     <tbody>
         {% for submit in submits %}
@@ -56,6 +57,7 @@
             </td>
             <td>{{ submit.author }}</td>
             <td>{{ submit.algorithm }}</td>
+            <td>{{ submit.judge_verdict }}</td>
             <td>{{ submit.score|floatformat:1 }}%</td>
             <td>{{ submit.elapsed_seconds }} sec</td>
         </tr>

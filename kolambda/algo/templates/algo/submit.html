@@ -34,7 +34,10 @@
         <div class="match_comment">
             * &ndash; Levenshtein distance by tokens: {{ comparer.distance }} (max {{ comparer.max_distance }})
         </div>
-        <div class="submit_elapsed_time">Time: {{ submit.elapsed_seconds }} seconds</div>
+        {% if submit.algorithm.is_checkable_via_judge %}
+        <div class="submit_field">Verdict: {{ submit.judge_verdict }}</div>
+        {% endif %}
+        <div class="submit_field">Writing time: {{ submit.elapsed_seconds }} seconds</div>
     </div>
 
     <div class="match_continue">
