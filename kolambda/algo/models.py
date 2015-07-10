@@ -7,6 +7,8 @@ class Language(models.Model):
     name = models.CharField(max_length=255)
     mime_type = models.CharField(max_length=60)
 
+    judge_language_id = models.IntegerField()
+
     def __str__(self):
         return self.name
 
@@ -17,8 +19,15 @@ class Algorithm(models.Model):
     language = models.ForeignKey(Language)
     source_code = models.TextField()
 
+    judge_space_id = models.IntegerField(blank=True, null=True)
+    judge_problem_id = models.IntegerField(blank=True, null=True)
+
     def __str__(self):
         return self.name
+
+    def is_checkable_via_judge(self):
+        return (self.judge_space_id is not None and
+                self.judge_problem_id is not None)
 
 
 class Submit(models.Model):
@@ -28,6 +37,8 @@ class Submit(models.Model):
     elapsed_seconds = models.IntegerField()
     source_code = models.TextField()
     score = models.FloatField()
+
+    judge_verdict = models.CharField(blank=True, max_length=255)
 
     def __str__(self):
         return '{}: {} (score {:.1f})'.format(

@@ -33,9 +33,10 @@
         {% for row in scoreboard %}
         <tr>
             <td class="algorithm_cell">
-                <a href="{% url 'algo:check' algorithm_slug=row.algorithm.slug %}" title="Try to write {{ row.algorithm.name }}">
-                    {{ row.algorithm.name }}
-                </a>
+                <a href="{% url 'algo:check' algorithm_slug=row.algorithm.slug %}" title="Try to write {{ row.algorithm.name }}">{{ row.algorithm.name }}</a>
+                {% if row.algorithm.is_checkable_via_judge %}
+                <span class="algorithm_checked" title="The submits will be checked for correctness via Timus Online Judge">&#10004;</span>
+                {% endif %}
             </td>
             {% for cell in row.submits %}
             {% if cell.submit %}

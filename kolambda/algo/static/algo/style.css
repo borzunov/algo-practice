@@ -107,6 +107,10 @@ h3 {
     text-decoration: underline;
 }
 
+.algorithm_checked {
+    color: #66f;
+}
+
 
 /* Check page */
 

@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from .code_processing import EditableSourceRegion, CodeComparer
 from .models import Algorithm, Submit
+from . import tasks
 
 
 EPS = 1e-7
@@ -86,6 +87,7 @@ def create_submit(request, algorithm_slug):
     except (KeyError, ValueError):
         return redirect('algo:check', algorithm_slug=algorithm_slug)
     algorithm = get_object_or_404(Algorithm, slug=algorithm_slug)
+    checkable = algorithm.is_checkable_via_judge()
 
     comparer = CodeComparer(written_code, algorithm.source_code)
     submit = Submit.objects.create(
@@ -93,7 +95,11 @@ def create_submit(request, algorithm_slug):
         author=request.user,
         elapsed_seconds=elapsed_seconds,
         source_code=written_code,
-        score=comparer.score)
+        score=comparer.score,
+        judge_verdict='Sending' if checkable else '')
+
+    if checkable:
+        tasks.submit_to_judge.delay(submit.id)
 
     return redirect('algo:show_new_submit',
                     author_username=request.user.username,

@@ -109,3 +109,6 @@ LOGIN_REDIRECT_URL = 'algo:index'
 LOGIN_URL = 'login'
 
 LOGOUT_URL = 'logout'
+
+
+TIMUS_JUDGE_ID = '187795NFAJLYT'
