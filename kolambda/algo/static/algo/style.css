@@ -279,3 +279,7 @@ h3 {
     background-color: #eee;
     padding: 10px;
 }
+
+.verdict_column {
+    width: 160px;
+}

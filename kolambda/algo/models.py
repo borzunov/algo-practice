@@ -54,6 +54,13 @@ JUDGE_VERDICTS = {
 }
 
 
+def get_judge_verdict_params(verdict):
+    for key, value in JUDGE_VERDICTS.items():
+        if verdict.startswith(key):
+            return value
+    return ('?', 'unknown')
+
+
 class Submit(models.Model):
     algorithm = models.ForeignKey(Algorithm)
     author = models.ForeignKey(User)
@@ -73,10 +80,7 @@ class Submit(models.Model):
             self.author, self.algorithm, self.score)
 
     def get_short_verdict(self):
-        try:
-            res = JUDGE_VERDICTS[self.judge_verdict][0]
-        except KeyError:
-            res = '?'
+        res = get_judge_verdict_params(self.judge_verdict)[0]
         if self.judge_test is not None:
             res += ' {}'.format(self.judge_test)
         return res
@@ -88,10 +92,7 @@ class Submit(models.Model):
         return res
 
     def get_verdict_type(self):
-        try:
-            return JUDGE_VERDICTS[self.judge_verdict][1]
-        except KeyError:
-            return 'unknown'
+        return get_judge_verdict_params(self.judge_verdict)[1]
 
     def get_verdict_kind(self):
         verdict_type = self.get_verdict_type()

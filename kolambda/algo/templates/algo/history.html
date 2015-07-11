@@ -39,7 +39,7 @@
         <th>Date</th>
         <th>Author</th>
         <th>Algorithm</th>
-        <th>Verdict</th>
+        <th class="verdict_column">Verdict</th>
         <th>Test</th>
         <th>Match score</th>
         <th>Writing time</th>
@@ -58,7 +58,7 @@
             </td>
             <td>{{ submit.author }}</td>
             <td>{{ submit.algorithm }}</td>
-            <td>
+            <td class="verdict_column">
                 {% if submit.judge_verdict != None %}
                 <span class="verdict_{{ submit.get_verdict_kind }}">
                     {{ submit.judge_verdict }}
