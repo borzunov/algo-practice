@@ -48,8 +48,9 @@ def submit_to_judge(submit_id):
             raise JudgeAPIException('Got unexpected Location header "{}"'
                                     .format(response.headers['location']))
         verdict = 'Checking'
-    except (requests.exceptions.RequestException, JudgeAPIException):
+    except (requests.exceptions.RequestException, JudgeAPIException) as err:
         verdict = 'Sending failed'
+        submit.judge_comment = str(err)
     submit.judge_verdict = verdict
     submit.judge_submit_date = timezone.now()
     if submit.get_verdict_type() != 'waiting':
@@ -92,6 +93,17 @@ def calculate_reload_delay(prev_attempt_no):
         prev_attempt_no -= queries_count
 
 
+def get_judge_ce_details(session, judge_submit_id):
+    try:
+        response = session.get('http://acm.timus.ru/ce.aspx?id={}'
+                               .format(judge_submit_id))
+        if response.status_code != 200:
+            return None
+    except requests.exceptions.RequestException:
+        return None
+    return response.text
+
+
 @shared_task
 def update_judge_verdict(submit_id, session, attempt_no):
     submit = Submit.objects.get(pk=submit_id)
@@ -112,14 +124,19 @@ def update_judge_verdict(submit_id, session, attempt_no):
             if not response.text.startswith('submit'):
                 raise ValueError
             fields = response.text.splitlines()[1].split('\t')
+            judge_submit_id = int(fields[0])
             verdict = fields[6]
             test = int(fields[7]) if fields[7] else None
+
+            if verdict == 'Compilation error':
+                submit.judge_comment = get_judge_ce_details(session,
+                                                            judge_submit_id)
         except (ValueError, IndexError):
             raise JudgeAPIException('Invalid response text')
-    except (requests.exceptions.RequestException, JudgeAPIException):
+    except (requests.exceptions.RequestException, JudgeAPIException) as err:
         verdict = 'Check failed'
         test = None
-        # TODO: Add exception message to a judge comment field
+        submit.judge_comment = str(err)
     submit.judge_verdict = verdict
     if test:
         submit.judge_test = test
@@ -140,10 +157,6 @@ def update_judge_verdict(submit_id, session, attempt_no):
         next_submit = next_enqueued.first()
         if next_submit is not None:
             invoke_submit_to_judge(next_submit.id)
-            print('Submit with score {:.2f} have been dequeued'.format(
-                  next_submit.score))  # FIXME:
-        else:
-            print('No submits to dequeue')  # FIXME:
     else:
         update_judge_verdict.apply_async(
             (submit_id, session, attempt_no + 1),

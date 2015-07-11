@@ -65,7 +65,7 @@ class Submit(models.Model):
     judge_submit_date = models.DateTimeField(blank=True, null=True)
     judge_verdict = models.CharField(blank=True, max_length=255)
     judge_test = models.IntegerField(blank=True, null=True)
-    judge_comment = models.TextField(blank=True, null=True)
+    judge_comment = models.TextField(blank=True)
     awaiting_for_verdict = models.BooleanField()
 
     def __str__(self):

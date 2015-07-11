@@ -196,6 +196,14 @@ h3 {
     margin: 4px;
 }
 
+.submit_judge_comment {
+    color: gray;
+    display: inline-block;
+    font-family: "Lucida Console", Monaco, monospace;
+    font-size: 12px;
+    text-align: left;
+}
+
 .submit_writing_time {
     margin: 10px;
 }

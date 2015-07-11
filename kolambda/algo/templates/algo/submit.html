@@ -49,6 +49,11 @@
         {% if submit.judge_test != None %}
         <div class="submit_field">Test: {{ submit.judge_test }}</div>
         {% endif %}
+        {% if submit.judge_comment != '' %}
+        <div class="submit_judge_comment">
+            {{ submit.judge_comment|linebreaksbr }}
+        </div>
+        {% endif %}
         <div class="submit_field submit_writing_time">Writing time: {{ submit.elapsed_seconds }} seconds</div>
     </div>
 
