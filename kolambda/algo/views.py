@@ -67,7 +67,7 @@ def check(request, algorithm_slug):
 def create_submit(request, algorithm_slug):
     try:
         written_code = request.POST['source_code'].rstrip()
-        #  Set required newline character
+        #  Set required newline characters
         written_code = '\n'.join(written_code.splitlines())
         elapsed_seconds = int(request.POST['elapsed_seconds'])
     except (KeyError, ValueError):
@@ -82,10 +82,14 @@ def create_submit(request, algorithm_slug):
         elapsed_seconds=elapsed_seconds,
         source_code=written_code,
         score=comparer.score,
-        judge_verdict='Sending' if checkable else '')
+        judge_verdict='Enqueued' if checkable else '',
+        awaiting_for_verdict=checkable)
 
     if checkable:
-        tasks.submit_to_judge.delay(submit.id)
+        prev_enqueued = Submit.objects.filter(
+            pk__lt=submit.id, awaiting_for_verdict=True)
+        if not prev_enqueued.exists():
+            tasks.invoke_submit_to_judge(submit.id)
 
     return redirect('algo:show_new_submit',
                     author_username=request.user.username,

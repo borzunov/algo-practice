@@ -31,10 +31,11 @@ class Algorithm(models.Model):
 
 
 JUDGE_VERDICTS = {
+    'Enqueued':                ('UK', 'waiting'),
     'Sending':                 ('UK', 'waiting'),
-    'Sent':                    ('UK', 'waiting'),
     'Sending failed':          ('ERR', 'error'),
-    'Check failed':            ('ERR', 'error'),
+    'Checking':                ('UK', 'waiting'),
+    'Checking failed':         ('ERR', 'error'),
 
     'Waiting':                 ('UK', 'waiting'),
     'Compiling':               ('UK', 'waiting'),
@@ -61,8 +62,11 @@ class Submit(models.Model):
     source_code = models.TextField()
     score = models.FloatField()
 
+    judge_submit_date = models.DateTimeField(blank=True, null=True)
     judge_verdict = models.CharField(blank=True, max_length=255)
     judge_test = models.IntegerField(blank=True, null=True)
+    judge_comment = models.TextField(blank=True, null=True)
+    awaiting_for_verdict = models.BooleanField()
 
     def __str__(self):
         return '{}: {} (score {:.1f})'.format(
