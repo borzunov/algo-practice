@@ -40,9 +40,13 @@
             </td>
             {% for cell in row.submits %}
             {% if cell.submit %}
-            <td class="submits_cell last_submit_{{ cell.submit_kind }}">
-                <div class="last_submit_score" title="Match score of last submit">{{ cell.submit.score|floatformat:1 }}%</div>
+            <td class="submits_cell last_submit_{{ cell.submit.get_kind }}">
+                {% if cell.submit.is_scores_visible %}
+                <div title="Match score of last submit">{{ cell.submit.score|floatformat:1 }}%</div>
                 <div class="last_submit_elapsed_seconds" title="Elapsed time of last submit">{{ cell.submit.elapsed_seconds }} sec</div>
+                {% else %}
+                <div title="{{ cell.submit.get_full_verdict }}">{{ cell.submit.get_short_verdict }}</div>
+                {% endif %}
                 <a class="history_link" href="{% url 'algo:history' author_username=cell.author.username algorithm_slug=row.algorithm.slug %}">
                     <div class="last_submit_time">{{ cell.submit.date|timesince|upto:"," }} ago</div>
                 </a>

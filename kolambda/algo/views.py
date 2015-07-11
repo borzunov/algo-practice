@@ -10,19 +10,6 @@ from .models import Algorithm, Submit
 from . import tasks
 
 
-EPS = 1e-7
-
-
-def get_submit_kind(item):
-    if item is None:
-        return None
-    if item.score < 80 - EPS:
-        return 'bad'
-    if item.score < 95 - EPS:
-        return 'good'
-    return 'perfect'
-
-
 @login_required
 def index(request):
     algorithms = Algorithm.objects.all()
@@ -38,7 +25,6 @@ def index(request):
             submits.append({
                 'author': author,
                 'submit': last_submit,
-                'submit_kind': get_submit_kind(last_submit),
             })
         scoreboard.append({
             'algorithm': algorithm,
@@ -117,7 +103,7 @@ def history(request, author_username, algorithm_slug=None):
         submits = Submit.objects.filter(author=author)
     submits = submits.order_by('-pk')
     full_matches_count = sum(1 for item in submits
-                             if abs(item.score - 100) < EPS)
+                             if abs(item.score - 100) < Submit.EPS)
     return render(request, 'algo/history.html', {
         'algorithm': algorithm,
         'author': author,

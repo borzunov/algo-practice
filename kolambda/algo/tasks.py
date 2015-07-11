@@ -18,38 +18,26 @@ def login_into_judge():
 
 @shared_task
 def submit_to_judge(submit_id):
-    session = login_into_judge()
-
     submit = Submit.objects.get(pk=submit_id)
-    url = 'http://acm.timus.ru/submit.aspx?space={}'.format(
-        submit.algorithm.judge_space_id)
-    response = session.post(url, data={
-        'Action': 'submit',
-        'JudgeID': settings.TIMUS_JUDGE_ID,
-        'SpaceID': str(submit.algorithm.judge_space_id),
-        'ProblemNum': str(submit.algorithm.judge_problem_id),
-        'Language': str(submit.algorithm.language.judge_language_id),
-        'Source': submit.source_code})
+    try:
+        session = login_into_judge()
 
-    submit.judge_verdict = 'Sent'
+        url = 'http://acm.timus.ru/submit.aspx?space={}'.format(
+            submit.algorithm.judge_space_id)
+        session.post(url, data={
+            'Action': 'submit',
+            'JudgeID': settings.TIMUS_JUDGE_ID,
+            'SpaceID': str(submit.algorithm.judge_space_id),
+            'ProblemNum': str(submit.algorithm.judge_problem_id),
+            'Language': str(submit.algorithm.language.judge_language_id),
+            'Source': submit.source_code})
+        verdict = 'Sent'
+    except requests.exceptions.RequestException:
+        verdict = 'Sending failed'
+    submit.judge_verdict = verdict
     submit.save()
 
     update_judge_verdict.delay(submit_id, session, 1)
-
-
-LOCAL_VERDICTS = ('Sending', 'Sent', 'Retrieving failed')
-TIMUS_WAITING_VERDICTS = ('Waiting', 'Compiling', 'Running')
-TIMUS_REJECTED_VERDICTS = (
-    'Compilation error',
-    'Wrong answer',
-    'Time limit exceeded',
-    'Memory limit exceeded',
-    'Output limit exceeded',
-    'Idleness limit exceeded',
-    'Runtime error',
-    'Restricted function',
-)
-TIMUS_ACCEPTED_VERDICTS = ('Accepted',)
 
 
 RELOAD_SCHEDULE = [
@@ -71,22 +59,27 @@ def calculate_reload_delay(prev_attempt_no):
 @shared_task
 def update_judge_verdict(submit_id, session, attempt_no):
     submit = Submit.objects.get(pk=submit_id)
-    judge_author_id = re.match(r'\d+', settings.TIMUS_JUDGE_ID).group()
-    url = ('http://acm.timus.ru/textstatus.aspx?space={}&num={}&author={}'
-           .format(submit.algorithm.judge_space_id,
+    try:
+        judge_author_id = re.match(r'\d+', settings.TIMUS_JUDGE_ID).group()
+        url = ('http://acm.timus.ru/textstatus.aspx' +
+               '?space={}&num={}&author={}&count=1'.format(
+                   submit.algorithm.judge_space_id,
                    submit.algorithm.judge_problem_id,
                    judge_author_id))
-    response = session.get(url)
-
-    print(response.text)  # FIXME:
-    try:
-        verdict = response.text.splitlines()[1].split('\t')[6]
-    except IndexError:
-        verdict = 'Retrieving failed'
+        response = session.get(url)
+        print(response.text)  # FIXME:
+        fields = response.text.splitlines()[1].split('\t')
+        verdict = fields[6]
+        test = int(fields[7]) if fields[7] else None
+    except (requests.exceptions.RequestException, IndexError, ValueError):
+        verdict = 'Check failed'
+        test = None
     submit.judge_verdict = verdict
+    if test:
+        submit.judge_test = test
     submit.save()
 
-    if verdict in LOCAL_VERDICTS + TIMUS_WAITING_VERDICTS:
+    if submit.get_verdict_type() == 'waiting':
         update_judge_verdict.apply_async(
             (submit_id, session, attempt_no + 1),
             countdown=calculate_reload_delay(attempt_no))

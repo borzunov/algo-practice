@@ -40,6 +40,7 @@
         <th>Author</th>
         <th>Algorithm</th>
         <th>Verdict</th>
+        <th>Test</th>
         <th>Match score</th>
         <th>Writing time</th>
     </thead>
@@ -57,8 +58,23 @@
             </td>
             <td>{{ submit.author }}</td>
             <td>{{ submit.algorithm }}</td>
-            <td>{{ submit.judge_verdict }}</td>
-            <td>{{ submit.score|floatformat:1 }}%</td>
+            <td>
+                {% if submit.judge_verdict != None %}
+                <span class="verdict_{{ submit.get_verdict_kind }}">
+                    {{ submit.judge_verdict }}
+                </span>
+                {% endif %}
+            </td>
+            <td>
+                {% if submit.judge_test != None %}
+                {{ submit.judge_test }}
+                {% endif %}
+            </td>
+            <td>
+                {% if submit.is_scores_visible %}
+                {{ submit.score|floatformat:1 }}%
+                {% endif %}
+            </td>
             <td>{{ submit.elapsed_seconds }} sec</td>
         </tr>
         {% endfor %}

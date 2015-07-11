@@ -30,14 +30,26 @@
     <h3>Comparing {{ submit.algorithm.name }}</h3>
 
     <div class="match_description">
+        {% if submit.is_scores_visible %}
         <div class="match_percents">Match: {{ comparer.score|floatformat:1 }}%</div>
         <div class="match_comment">
             * &ndash; Levenshtein distance by tokens: {{ comparer.distance }} (max {{ comparer.max_distance }})
         </div>
-        {% if submit.algorithm.is_checkable_via_judge %}
-        <div class="submit_field">Verdict: {{ submit.judge_verdict }}</div>
+        {% if submit.judge_verdict %}
+        <div class="submit_field">
+            Verdict:
+            <span class="verdict_{{ submit.get_verdict_kind }}">{{ submit.judge_verdict }}</span>
+        </div>
         {% endif %}
-        <div class="submit_field">Writing time: {{ submit.elapsed_seconds }} seconds</div>
+        {% else %}
+        <div class="match_big_verdict verdict_{{ submit.get_verdict_kind }}">
+            {{ submit.judge_verdict }}
+        </div>
+        {% endif %}
+        {% if submit.judge_test != None %}
+        <div class="submit_field">Test: {{ submit.judge_test }}</div>
+        {% endif %}
+        <div class="submit_field submit_writing_time">Writing time: {{ submit.elapsed_seconds }} seconds</div>
     </div>
 
     <div class="match_continue">

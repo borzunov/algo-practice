@@ -40,6 +40,14 @@ h3 {
     background-color: white;
 }
 
+.verdict_bad {
+    color: #c00;
+}
+
+.verdict_good {
+    color: green;
+}
+
 
 /* Index page */
 
@@ -64,6 +72,7 @@ h3 {
     height: 60px;
     padding: 10px;
     text-align: center;
+    vertical-align: middle;
 }
 
 .scoreboard .current_user {
@@ -104,6 +113,7 @@ h3 {
 .last_submit_time {
     color: gray;
     font-size: 10pt;
+    margin: 4px;
     text-decoration: underline;
 }
 
@@ -176,9 +186,22 @@ h3 {
     margin-bottom: 7px;
 }
 
+.match_big_verdict {
+    font-size: 20pt;
+    margin: 10px;
+}
+
 .submit_field {
     font-size: 14pt;
     margin: 4px;
+}
+
+.submit_writing_time {
+    margin: 10px;
+}
+
+.submit_judge_test {
+    margin-bottom: 10px;
 }
 
 .submit_code_area {
