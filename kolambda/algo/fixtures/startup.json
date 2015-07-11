@@ -1,66 +1,76 @@
 [
 {
-    "pk": 1,
     "model": "auth.group",
-    "fields": {
-        "permissions": [],
-        "name": "algo"
-    }
-},
-{
     "pk": 1,
-    "model": "algo.language",
     "fields": {
-        "mime_type": "text/x-c++src",
-        "name": "C++"
+        "name": "algo",
+        "permissions": []
     }
 },
 {
+    "model": "algo.language",
+    "pk": 1,
+    "fields": {
+        "name": "C++",
+        "judge_language_id": 10,
+        "mime_type": "text/x-c++src"
+    }
+},
+{
+    "model": "algo.language",
     "pk": 2,
-    "model": "algo.language",
     "fields": {
-        "mime_type": "text/x-java",
-        "name": "Java"
+        "name": "Java",
+        "judge_language_id": 32,
+        "mime_type": "text/x-java"
     }
 },
 {
-    "pk": 1,
     "model": "algo.algorithm",
+    "pk": 1,
     "fields": {
+        "judge_problem_id": null,
         "slug": "pi-function",
-        "language": 1,
+        "judge_space_id": null,
+        "name": "pi-function",
         "source_code": "#include <iostream>\r\n#include <cstdio>\r\n#include <cstdlib>\r\n#include <cstring>\r\n#include <vector>\r\n#include <algorithm>\r\n#include <cstring>\r\n#include <string>\r\n#include <cmath>\r\n#include <set>\r\n#include <map>\r\nusing namespace std;\r\n\r\n#ifdef LOCAL\r\n\t#define eprintf(...) fprintf(stderr, __VA_ARGS__)\r\n#else\r\n\t#define eprintf(...) 42\r\n#endif\r\n\r\ntypedef long long ll;\r\n\r\nconst int N = (int)1e5 + 10;\r\nchar str[N];\r\nint pi[N];\r\nint n;\r\n\r\n//[StartCodeRegion]\r\nvoid calcPi()\r\n{\r\n\tfor (int i = 1; i < n; i++)\r\n\t{\r\n\t\tint j = pi[i - 1];\r\n\t\twhile (j > 0 && str[i] != str[j])\r\n\t\t\tj = pi[j - 1];\r\n\t\tif (str[i] == str[j])\r\n\t\t\tj++;\r\n\t\tpi[i] = j;\r\n\t}\r\n}\r\n//[EndCodeRegion]\r\n\r\nint main()\r\n{\r\n\tscanf(\"%s\", str);\r\n\tn = strlen(str);\r\n\tcalcPi();\r\n\tfor (int i = 0; i < n; i++)\r\n\t\tprintf(\"%d \", pi[i]);\r\n\tprintf(\"\\n\");\r\n\treturn 0;\r\n}\r\n",
-        "name": "pi-function"
+        "language": 1
     }
 },
 {
+    "model": "algo.algorithm",
     "pk": 2,
-    "model": "algo.algorithm",
     "fields": {
+        "judge_problem_id": null,
         "slug": "heavy-light",
-        "language": 1,
+        "judge_space_id": null,
+        "name": "heavy-light",
         "source_code": "#include <iostream>\r\n#include <cstdio>\r\n#include <cstdlib>\r\n#include <cstring>\r\n#include <vector>\r\n#include <algorithm>\r\n#include <cstring>\r\n#include <string>\r\n#include <cmath>\r\n#include <set>\r\n#include <map>\r\nusing namespace std;\r\n\r\n#ifdef LOCAL\r\n\t#define eprintf(...) fprintf(stderr, __VA_ARGS__)\r\n#else\r\n\t#define eprintf(...) 42\r\n#endif\r\n\r\ntypedef long long ll;\r\n\r\nconst int N = (int)1e5 + 10;\r\nconst int LOG = 17;\r\n\r\n//[StartCodeRegion]\r\nstruct SegmentTree\r\n{\r\n\tint len;\r\n\tvector <int> tree;\r\n\tSegmentTree ()\r\n\t{\r\n\t\tlen = 0;\r\n\t\ttree = vector<int>();\r\n\t}\r\n\tSegmentTree (int _len)\r\n\t{\r\n\t\tlen = _len;\r\n\t\ttree = vector<int>(4 * len, 0);\r\n\t}\r\n\tvoid addValue(int pos, int value, int v, int l, int r)\r\n\t{\r\n\t\tif (l == r)\r\n\t\t{\r\n\t\t\ttree[v] += value;\r\n\t\t\treturn;\r\n\t\t}\r\n\t\tint m = (l + r) / 2;\r\n\t\tif (pos <= m)\r\n\t\t\taddValue(pos, value, 2 * v, l, m);\r\n\t\telse\r\n\t\t\taddValue(pos, value, 2 * v + 1, m + 1, r);\r\n\t\ttree[v] = max(tree[2 * v], tree[2 * v + 1]);\r\n\t}\r\n\tvoid addValue(int a, int b)\r\n\t{\r\n\t\taddValue(a, b, 1, 0, len - 1);\r\n\t}\r\n\tint getMax(int a, int b, int v, int l, int r)\r\n\t{\r\n\t\tif (l >= a && r <= b)\r\n\t\t\treturn tree[v];\r\n\t\tif (l > b || r < a)\r\n\t\t\treturn 0;\r\n\t\tint m = (l + r) / 2;\r\n\t\treturn max(getMax(a, b, 2 * v, l, m), getMax(a, b, 2 * v + 1, m + 1, r));\r\n\t}\r\n\tint getMax(int a, int b)\r\n\t{\r\n\t\treturn getMax(a, b, 1, 0, len - 1);\r\n\t}\r\n};\r\n\r\nvector <int> g[N];\r\nSegmentTree pathTree[N];\r\nint upToLight[N];\r\nint pathSize[N];\r\nint jump[LOG][N];\r\nint sz[N], h[N];\r\n\r\nint calcSizes(int v, int p)\r\n{\r\n\tjump[0][v] = p;\r\n\tfor (int i = 1; i < LOG; i++)\r\n\t\tjump[i][v] = jump[i - 1][jump[i - 1][v]];\r\n\r\n\tsz[v] = 1;\r\n\tfor (int i = 0; i < (int)g[v].size(); i++)\r\n\t{\r\n\t\tint to = g[v][i];\r\n\t\tif (to == p) continue;\r\n\t\th[to] = h[v] + 1;\r\n\t\tsz[v] += calcSizes(to, v);\t\t\r\n\t}\r\n\treturn sz[v];\r\n}\r\n\r\nvoid markPaths(int v, int p)\r\n{\r\n\tpathSize[upToLight[v]] = max(pathSize[upToLight[v]], h[v] - h[upToLight[v]] + 1);\r\n\r\n\tfor (int i = 0; i < (int)g[v].size(); i++)\r\n\t{\r\n\t\tint to = g[v][i];\r\n\t\tif (to == p) continue;\r\n\t\tif (sz[to] * 2 < sz[v])\r\n\t\t\tupToLight[to] = to;\r\n\t\telse\r\n\t\t\tupToLight[to] = upToLight[v];\r\n\t\tmarkPaths(to, v);\r\n\t}\r\n}\r\n\r\nvoid buildHLD(int n)\r\n{\r\n\th[1] = 1;\r\n\tcalcSizes(1, 0);\r\n\tmarkPaths(1, 0);\r\n\tfor (int i = 0; i <= n; i++)\r\n\t{\r\n\t\tif (upToLight[i] == i)\r\n\t\t\tpathTree[i] = SegmentTree(pathSize[i]); \r\n\t}\r\n}\r\n\r\nint goUp(int v, int dist)\r\n{\r\n\tfor (int i = LOG - 1; i >= 0; i--)\r\n\t{\r\n\t\tif (dist >= (1 << i))\r\n\t\t{\r\n\t\t\tdist -= (1 << i);\r\n\t\t\tv = jump[i][v];\r\n\t\t}\r\n\t}\r\n\treturn v;\r\n}\r\n\r\nint getLca(int a, int b)\r\n{\r\n\tif (h[a] < h[b])\r\n\t\treturn getLca(b, a);\r\n\ta = goUp(a, h[a] - h[b]);\r\n\tif (a == b)\r\n\t\treturn a;\r\n\tfor (int i = LOG - 1; i >= 0; i--)\r\n\t{\r\n\t\tint na = jump[i][a];\r\n\t\tint nb = jump[i][b];\r\n\t\tif (na != nb)\r\n\t\t\ta = na, b = nb;\r\n\t}\r\n\treturn jump[0][a];\r\n}\r\n\r\nvoid addValue(int v, int value)\r\n{\r\n\tint e = upToLight[v];\r\n\tpathTree[e].addValue(h[v] - h[e], value);\r\n}\r\n\r\nint getMaxValueUp(int a, int b)\r\n{\r\n\tint answer = 0;\r\n\twhile (h[a] >= h[b])\r\n\t{\r\n\t\tint e = upToLight[a];\r\n\t\tint l = max(0, h[b] - h[e]);\r\n\t\tint r = h[a] - h[e];\r\n\t\tanswer = max(answer, pathTree[e].getMax(l, r));\r\n\t\ta = jump[0][e];\r\n\t}\r\n\treturn answer;\r\n}\r\n\r\nint getMaxValue(int a, int b)\r\n{\r\n\tint c = getLca(a, b);\r\n\treturn max(getMaxValueUp(a, c), getMaxValueUp(b, c));\r\n}\r\n//[EndCodeRegion]\r\n\r\nint main()\r\n{\r\n\tint n;\r\n\tscanf(\"%d\", &n);\r\n\tfor (int i = 0; i < n - 1; i++)\r\n\t{\r\n\t\tint a, b;\r\n\t\tscanf(\"%d%d\", &a, &b);\r\n\t\tg[a].push_back(b);\r\n\t\tg[b].push_back(a);\r\n\t}\r\n\r\n\tbuildHLD(n);\r\n\r\n\tint q;\r\n\tscanf(\"%d\", &q);\r\n\r\n\tfor (int i = 0; i < q; i++)\r\n\t{\r\n\t\tchar type;\r\n\t\tscanf(\" %c\", &type);\r\n\t\tif (type == 'I')\r\n\t\t{\r\n\t\t\tint v, value;\r\n\t\t\tscanf(\"%d%d\", &v, &value);\r\n\t\t\taddValue(v, value);\r\n\t\t}\r\n\t\telse\r\n\t\t{\r\n\t\t\tint a, b;\r\n\t\t\tscanf(\"%d%d\", &a, &b);\r\n\t\t\tprintf(\"%d\\n\", getMaxValue(a, b));\r\n\t\t}\r\n\t}\r\n\r\n\treturn 0;\r\n}\r\n",
-        "name": "heavy-light"
+        "language": 1
     }
 },
 {
+    "model": "algo.algorithm",
     "pk": 3,
-    "model": "algo.algorithm",
     "fields": {
+        "judge_problem_id": 1,
         "slug": "ab-on-c",
-        "language": 1,
+        "judge_space_id": 299,
+        "name": "A+B on C++",
         "source_code": "#include <iostream>\r\n#include <cstdio>\r\n#include <cstdlib>\r\n#include <cstring>\r\n#include <vector>\r\n#include <algorithm>\r\n#include <cstring>\r\n#include <string>\r\n#include <cmath>\r\n#include <set>\r\n#include <map>\r\nusing namespace std;\r\n\r\n#ifdef LOCAL\r\n\t#define eprintf(...) fprintf(stderr, __VA_ARGS__)\r\n#else\r\n\t#define eprintf(...) 42\r\n#endif\r\n\r\ntypedef long long ll;\r\n\r\nint main()\r\n{\r\n\tll a, b, c;\r\n\tcin >> a >> b;\r\n\t//[StartCodeRegion]\r\n\tc = a + b;\r\n\t//[EndCodeRegion]\r\n\tcout << c;\r\n\treturn 0;\r\n}\r\n",
-        "name": "A+B on C++"
+        "language": 1
     }
 },
 {
-    "pk": 4,
     "model": "algo.algorithm",
+    "pk": 4,
     "fields": {
+        "judge_problem_id": 1,
         "slug": "ab-on-java",
-        "language": 2,
+        "judge_space_id": 299,
+        "name": "A+B on Java",
         "source_code": "import java.io.*;\r\nimport java.util.*;\r\n\r\npublic class Sum\r\n{\r\n\tpublic static void main(String[] args)\r\n\t{\r\n\t\tScanner in = new Scanner(System.in);\r\n\t\tPrintWriter out = new PrintWriter(System.out);\r\n\r\n\t\tint a = in.nextInt();\r\n\t\tint b = in.nextInt();\r\n\t\tint c;\r\n\t\t//[StartCodeRegion]\r\n\t\tc = a + b;\r\n\t\t//[EndCodeRegion]\r\n\t\tout.println(c);\r\n\r\n\t\tout.flush();\r\n\t}\r\n}\r\n",
-        "name": "A+B on Java"
+        "language": 2
     }
 }
 ]
