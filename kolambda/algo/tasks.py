@@ -118,7 +118,6 @@ def update_judge_verdict(submit_id, session, attempt_no):
         if response.status_code != 200:
             raise JudgeAPIException('Got status code {}, expected 200'
                                     .format(response.status_code))
-        print(response.text)  # FIXME:
 
         try:
             if not response.text.startswith('submit'):
@@ -145,7 +144,7 @@ def update_judge_verdict(submit_id, session, attempt_no):
     submit.save()
 
     if submit.get_verdict_type() != 'waiting':
-        # FIXME: In rare cases, if a submit will be added in the view
+        # Warning! In rare cases, if a submit will be added in the view
         # when the worker executes code right here, the same submit will be
         # processed twice (because both the view and the worker invoke
         # submit_to_judge.delay). It can lead to wrong verdicts in

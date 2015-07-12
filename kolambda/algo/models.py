@@ -107,13 +107,16 @@ class Submit(models.Model):
 
     EPS = 1e-7
 
+    GOOD_SCORE = 70
+    PERFECT_SCORE = 90
+
     def get_kind(self):
         if self.judge_verdict:
             verdict_kind = self.get_verdict_kind()
             if verdict_kind in ('bad', 'unknown'):
                 return verdict_kind
-        if self.score < 80 - Submit.EPS:
-            return 'bad'
-        if self.score < 95 - Submit.EPS:
+        if self.score > Submit.PERFECT_SCORE - Submit.EPS:
+            return 'perfect'
+        if self.score > Submit.GOOD_SCORE - Submit.EPS:
             return 'good'
-        return 'perfect'
+        return 'bad'
