@@ -1,215 +1,290 @@
+/*
+* Base structure
+*/
+
+/* Move down content because we have a fixed navbar that is 50px tall */
+
 body {
-    margin: 0;
+    padding-top: 50px;
 }
 
-.account_bar {
-    background-color: #a7a7ff;
-    padding: 10px 20px 10px 25px;
+/*
+* Global add-ons
+*/
+
+.sub-header {
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
 }
 
-.account_info {
-    float: right;
+/*
+* Sidebar
+*/
+
+/* Hide for mobile, show later */
+
+.sidebar {
+    display: none;
 }
 
-.site_title {
-    font-size: 14pt;
-    font-weight: bold;
+@media (min-width: 768px) {
+    .sidebar {
+        position: fixed;
+        top: 51px;
+        bottom: 0;
+        left: 0;
+        z-index: 1000;
+        display: block;
+        padding: 20px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        /* Scrollable contents if viewport is shorter than content. */
+        background-color: #f5f5f5;
+        border-right: 1px solid #eee;
+    }
 }
 
-.content {
-    margin: 10px;
+/* Sidebar navigation */
+
+.nav-sidebar {
+    margin-right: -21px;
+    /* 20px padding + 1px border */
+    margin-bottom: 20px;
+    margin-left: -20px;
 }
 
-.content .CodeMirror-selected {
-    background-color: #aaf;
+.nav-sidebar > li > a {
+    padding-right: 20px;
+    padding-left: 20px;
 }
 
-h3 {
-    margin-top: 10px;
+/*
+* Main content
+*/
+
+.main {
+    padding: 20px;
 }
 
-.line_predefined {
-    background-color: #e7e7e7;
+@media (min-width: 768px) {
+    .main {
+        padding-right: 40px;
+        padding-left: 40px;
+    }
 }
 
-.content .CodeMirror-lines {
-    background-color: #e7e7e7;
+.breadcrumb {
+    margin: 0 0 20px 10px;
+    padding: 0;
 }
 
-.content .CodeMirror-lines > div {
-    background-color: white;
+.editor-breadcrumb {
+    margin-bottom: 10px;
 }
 
-.verdict_bad {
-    color: #c00;
+.main .page-header {
+    margin-top: 0;
+    border-bottom: none;
+    margin-bottom: 10px;
 }
 
-.verdict_good {
-    color: green;
-}
-
-
-/* Index page */
-
-.check_random_text {
-    font-weight: normal;
-}
-
-.scoreboard {
-    border-spacing: 2px;
-}
-
-.scoreboard a {
-    color: black;
-}
-
-.scoreboard th {
-    background-color: #ccf;
-    padding: 10px;
-}
-
-.scoreboard td {
-    height: 60px;
-    padding: 10px;
-    text-align: center;
-    vertical-align: middle;
-}
-
-.scoreboard .current_user {
-    background-color: #bbe;
-}
-
-.algorithm_cell {
-    background-color: #e0e0e0;
-}
-
-.submits_cell {
+.navbar-default {
     background-color: #eee;
-    vertical-align: top;
-    width: 100px;
+    border-color: #ddd;
 }
 
-.submits_cell a {
-    text-decoration: none;
+body {
+    color: #444;
+    font-size: 13px;
 }
 
-.last_submit_bad {
-    background-color: #fdd;
+.scoreboard-table {
+    width: auto;
 }
 
-.last_submit_good {
-    background-color: #ffc;
+.scoreboard-bad {
+    background-color: #f2d6d6;
 }
 
-.last_submit_perfect {
-    background-color: #bfb;
+.scoreboard-good {
+    background-color: #fcf8cb;
 }
 
-.last_submit_elapsed_seconds {
-    font-size: 9pt;
-    margin: 4px;
+.scoreboard-perfect {
+    background-color: #cff0c8;
 }
 
-.last_submit_time {
-    color: gray;
-    font-size: 10pt;
-    margin: 4px;
+.table a {
+    color: #666;
     text-decoration: underline;
 }
 
-.algorithm_checked {
-    color: #66f;
+.table a:hover {
+    color: #444;
 }
 
+.table th a {
+    color: #505050;
+}
 
-/* Check page */
+.table th a:hover {
+    color: #303030;
+}
 
-.check_content {
+.scoreboard-current-user {
+    background-color: #eee;
+}
+
+.table a.scoreboard-small-link {
+    font-size: 11px;
+}
+
+.scoreboard-table,
+.scoreboard-table tr,
+.scoreboard-table th,
+.scoreboard-table td {
+    border-color: #ccc !important;
+}
+
+.scoreboard-algorithm-checked {
+    color: gray;
+}
+
+.scoreboard-table tbody tr {
+    height: 83px;
+}
+
+.scoreboard-table th,
+.scoreboard-table td {
+    text-align: center;
+    vertical-align: middle !important;
+    width: 120px;
+}
+
+.scoreboard-writing-time {
+    font-size: 11px;
+    margin-top: 3px;
+}
+
+.scoreboard-check-random {
+    font-weight: normal;
+}
+
+.history-verdict-column {
+    width: 160px;
+}
+
+.verdict-bad {
+    color: #d9230f;
+}
+
+.verdict-good {
+    color: #282;
+}
+
+.history-table th,
+.history-table td {
+    text-align: center;
+    vertical-align: middle !important;
+}
+
+.check-content {
+    line-height: normal;
     margin-left: auto;
     margin-right: auto;
     text-align: center;
     width: 800px;
 }
 
-.check_content h2 {
+.main .editor-header {
+    font-size: 21px;
+    margin-bottom: 0;
+}
+
+.main .check-header {
     padding-left: 80px;
+    margin-bottom: 5px;
 }
 
-.check_code_area {
-    border: 1px solid #bbb;
-    margin-bottom: 10px;
-    text-align: left;
-}
-
-.check_elapsed_time {
-    margin-top: 5px;
+.check-writing-time {
     float: right;
+    margin-top: 2px;
 }
 
-
-/* Submit page */
-
-.submit_content {
+.submit-content {
+    line-height: normal;
     margin-left: auto;
     margin-right: auto;
     text-align: center;
     width: 1000px;
 }
 
-.submit_content h3 {
-    margin-bottom: 5px;
-    overflow-y: hidden;
+.submit-score {
+    font-size: 30px;
+    font-weight: bold;
+    margin: 0;
 }
 
-.match_description {
-    margin-top: 15px;
-    margin-bottom: 15px;
+.submit-score-comment {
+    color: #888;
+    font-size: 11px;
+    margin-top: 3px;
 }
 
-.match_continue {
+.submit-important-field {
+    font-size: 17px;
+    margin: 6px;
+}
+
+.submit-additional-fields {
     margin: 15px;
 }
 
-.match_continue a, .match_continue p {
-    margin: 5px;
-}
-
-.match_percents {
-    font-size: 24pt;
-    font-weight: bold;
-    margin: 5px;
-}
-
-.match_comment {
-    color: gray;
-    font-size: 10pt;
-    margin-bottom: 7px;
-}
-
-.match_big_verdict {
-    font-size: 20pt;
+.submit-additional-fields a {
     margin: 10px;
 }
 
-.submit_field {
-    font-size: 14pt;
-    margin: 4px;
+.submit-additional-fields p {
+    margin: 3px;
 }
 
-.submit_judge_comment {
+.submit-bad-verdict {
+    font-size: 25px;
+}
+
+.submit-judge-comment {
     color: gray;
     display: inline-block;
     font-family: "Lucida Console", Monaco, monospace;
     font-size: 12px;
+    margin: 8px;
     text-align: left;
 }
 
-.submit_writing_time {
-    margin: 10px;
+/*
+* CodeMirror additional styles
+*/
+
+.container .CodeMirror-selected {
+    background-color: #aaf;
 }
 
-.submit_judge_test {
+.line_predefined {
+    background-color: #e7e7e7;
+}
+
+.container .CodeMirror-lines {
+    background-color: #e7e7e7;
+}
+
+.container .CodeMirror-lines > div {
+    background-color: white;
+}
+
+.check_code_area {
+    border: 1px solid #bbb;
     margin-bottom: 10px;
+    text-align: left;
 }
 
 .submit_code_area {
@@ -239,6 +314,10 @@ h3 {
     margin-bottom: 20px;
 }
 
+.submit_code_area .CodeMirror-merge-2pane  .CodeMirror-merge-pane:first-child {
+    border-right: none;
+}
+
 .submit_code_area .CodeMirror-merge-l-chunk {
     background: #ffc;
 }
@@ -261,25 +340,4 @@ h3 {
     color: #669;
     background: #ccf;
     border: 1px solid #ccf;
-}
-
-
-/* History page */
-
-.history_table {
-    text-align: center;
-}
-
-.history_table th {
-    background-color: #ccf;
-    padding: 10px;
-}
-
-.history_table td {
-    background-color: #eee;
-    padding: 10px;
-}
-
-.verdict_column {
-    width: 160px;
 }

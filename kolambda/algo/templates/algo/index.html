@@ -5,58 +5,58 @@
 {% block title %}Scoreboard - {{ block.super }}{% endblock %}
 
 {% block content %}
-<h3>Scoreboard:</h3>
+<h3 class="page-header page-header-noborder">Scoreboard</h3>
 
-<table class="scoreboard">
-    <thead>
-        <tr>
-            <th>
-                Select algorithm
-                <div class="check_random_text">
-                    (or <a href="{% url 'algo:check_random' %}"  title="Try to write random algorithm">try random</a>):
-                </div>
-            </th>
-            {% for author in authors %}
-            {% if author.username == request.user.username %}
-            <th class="current_user">
-            {% else %}
-            <th>
-            {% endif %}
-                <a href="{% url 'algo:history' author.username %}" title="All submits by {{ author.username }}">
-                    {{ author.username }}
-                </a>
-            </th>
-            {% endfor %}
-        </tr>
-    </thead>
-    <tbody>
-        {% for row in scoreboard %}
-        <tr>
-            <td class="algorithm_cell">
-                <a href="{% url 'algo:check' algorithm_slug=row.algorithm.slug %}" title="Try to write {{ row.algorithm.name }}">{{ row.algorithm.name }}</a>
-                {% if row.algorithm.is_checkable_via_judge %}
-                <span class="algorithm_checked" title="The submits will be checked for correctness via Timus Online Judge">&#10004;</span>
-                {% endif %}
-            </td>
-            {% for cell in row.submits %}
-            {% if cell.submit %}
-            <td class="submits_cell last_submit_{{ cell.submit.get_kind }}">
-                {% if cell.submit.is_scores_visible %}
-                <div title="Match score of last submit">{{ cell.submit.score|floatformat:1 }}%</div>
-                <div class="last_submit_elapsed_seconds" title="Elapsed time of last submit">{{ cell.submit.elapsed_seconds }} sec</div>
+<div class="table-responsive">
+    <table class="table table-bordered table-hover scoreboard-table">
+        <thead>
+            <tr>
+                <th>
+                    <div>Algorithm</div>
+                    <div class="scoreboard-check-random">
+                        <a href="{% url 'algo:check_random' %}"  title="Try to write random algorithm" class="scoreboard-small-link">random</a>
+                    </div>
+                </th>
+                {% for author in authors %}
+                {% if author.username == request.user.username %}
+                <th class="scoreboard-current-user">
                 {% else %}
-                <div title="{{ cell.submit.get_full_verdict }}">{{ cell.submit.get_short_verdict }}</div>
+                <th>
                 {% endif %}
-                <a class="history_link" href="{% url 'algo:history' author_username=cell.author.username algorithm_slug=row.algorithm.slug %}">
-                    <div class="last_submit_time">{{ cell.submit.date|timesince|upto:"," }} ago</div>
-                </a>
-            </td>
-            {% else %}
-            <td class="submits_cell"></td>
-            {% endif %}
+                    <a href="{% url 'algo:history' author_username=author.username %}" title="All submits by {{ author.username }}">{{ author.username }}</a>
+                </th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in scoreboard %}
+            <tr>
+                <td>
+                    <a href="{% url 'algo:check' algorithm_slug=row.algorithm.slug %}" title="Try to write {{ row.algorithm.name }}">{{ row.algorithm.name }}</a>
+                    {% if row.algorithm.is_checkable_via_judge %}
+                    <span class="scoreboard-algorithm-checked" title="The submits will be checked for correctness via Timus Online Judge">&#10004;</span>
+                    {% endif %}
+                </td>
+                {% for cell in row.submits %}
+                {% if cell.submit %}
+                <td class="scoreboard-{{ cell.submit.get_kind }}">
+                    {% if cell.submit.is_scores_visible %}
+                    <div title="Match score of the last submit">{{ cell.submit.score|floatformat:1 }}%</div>
+                    <div class="scoreboard-writing-time" title="Elapsed time of the last submit">{{ cell.submit.elapsed_seconds }} sec</div>
+                    {% else %}
+                    <div title="The last submit got {{ cell.submit.get_full_verdict }}">{{ cell.submit.get_short_verdict }}</div>
+                    {% endif %}
+                    <div>
+                        <a href="{% url 'algo:history' author_username=cell.author.username algorithm_slug=row.algorithm.slug %}" class="scoreboard-small-link">{{ cell.submit.date|timesince|upto:"," }} ago</a>
+                    </div>
+                </td>
+                {% else %}
+                <td></td>
+                {% endif %}
+                {% endfor %}
+            </tr>
             {% endfor %}
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        </tbody>
+    </table>
+</div>
 {% endblock %}

@@ -16,48 +16,45 @@
 {% endblock %}
 
 {% block content %}
-<div class="navigation_box">
-    &laquo; <a href="{% url 'algo:index' %}">Scoreboard</a>
-    &laquo; <a href="{% url 'algo:history' author_username=submit.author.username %}">
-        {{ submit.author.username }}
-    </a>
-    &laquo; <a href="{% url 'algo:history' author_username=submit.author.username algorithm_slug=submit.algorithm.slug %}">
-        {{ submit.algorithm.name }}
-    </a>
-</div>
+<ul class="breadcrumb editor-breadcrumb">
+    <li><a href="{% url 'algo:index' %}">Home</a></li>
+    <li><a href="{% url 'algo:history' author_username=submit.author.username %}">{{ submit.author.username }}</a></li>
+    <li><a href="{% url 'algo:history' author_username=submit.author.username algorithm_slug=submit.algorithm.slug %}">{{ submit.algorithm.name }}</a></li>
+    <li class="active">Submit #{{ submit.id }}</li>
+</ul>
 
-<div class="submit_content">
-    <h3>Comparing {{ submit.algorithm.name }}</h3>
+<div class="submit-content">
+    <h3 class="page-header editor-header">
+        Comparing {{ submit.algorithm.name }}
+    </h3>
 
-    <div class="match_description">
-        {% if submit.is_scores_visible %}
-        <div class="match_percents">Match: {{ comparer.score|floatformat:1 }}%</div>
-        <div class="match_comment">
-            * &ndash; Levenshtein distance by tokens: {{ comparer.distance }} (max {{ comparer.max_distance }})
-        </div>
-        {% if submit.judge_verdict %}
-        <div class="submit_field">
-            Verdict:
-            <span class="verdict_{{ submit.get_verdict_kind }}">{{ submit.judge_verdict }}</span>
-        </div>
-        {% endif %}
-        {% else %}
-        <div class="match_big_verdict verdict_{{ submit.get_verdict_kind }}">
-            {{ submit.judge_verdict }}
-        </div>
-        {% endif %}
-        {% if submit.judge_test != None %}
-        <div class="submit_field">Test: {{ submit.judge_test }}</div>
-        {% endif %}
-        {% if submit.judge_comment != '' %}
-        <div class="submit_judge_comment">
-            {{ submit.judge_comment|linebreaksbr }}
-        </div>
-        {% endif %}
-        <div class="submit_field submit_writing_time">Writing time: {{ submit.elapsed_seconds }} seconds</div>
+    {% if submit.is_scores_visible %}
+    <div class="submit-score">Match: {{ comparer.score|floatformat:1 }}%</div>
+    <div class="submit-score-comment">
+        * &ndash; Levenshtein distance by tokens: {{ comparer.distance }} (max {{ comparer.max_distance }})
     </div>
+    {% if submit.judge_verdict %}
+    <div class="submit-important-field">
+        Verdict:
+        <span class="verdict-{{ submit.get_verdict_kind }}">{{ submit.judge_verdict }}</span>
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="submit-bad-verdict verdict-{{ submit.get_verdict_kind }}">
+        {{ submit.judge_verdict }}
+    </div>
+    {% endif %}
+    {% if submit.judge_test != None %}
+    <div class="submit-important-field">Test: {{ submit.judge_test }}</div>
+    {% endif %}
+    {% if submit.judge_comment != '' %}
+    <div class="submit-judge-comment">
+        {{ submit.judge_comment|linebreaksbr }}
+    </div>
+    {% endif %}
+    <div class="submit-important-field submit_writing_time">Writing time: {{ submit.elapsed_seconds }} seconds</div>
 
-    <div class="match_continue">
+    <div class="submit-additional-fields">
         {% if new_submit %}
         <a href="{% url 'algo:check' algorithm_slug=submit.algorithm.slug %}">Try again</a>
         <a href="{% url 'algo:check_random' %}">Try random</a>

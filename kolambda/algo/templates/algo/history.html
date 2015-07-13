@@ -10,21 +10,22 @@
 {% endblock %}
 
 {% block content %}
-<div class="navigation_box">
-    &laquo; <a href="{% url 'algo:index' %}">Scoreboard</a>
+<ul class="breadcrumb">
+    <li><a href="{% url 'algo:index' %}">Home</a></li>
     {% if algorithm %}
-    &laquo; <a href="{% url 'algo:history' author_username=author.username %}">
-        {{ author.username }}
-    </a>
+    <li><a href="{% url 'algo:history' author_username=author.username %}">{{ author.username }}</a></li>
+    <li class="active">{{ algorithm.name }}</li>
+    {% else %}
+    <li class="active">{{ author.username }}</li>
     {% endif %}
-</div>
+</ul>
 
-<h3>
+<h3 class="page-header">
     Submits
     {% if algorithm %}
-    of <i>{{ algorithm.name }}</i>
+    of <a href="{% url 'algo:check' algorithm_slug=algorithm.slug %}" title="Try to write {{ algorithm.name }}">{{ algorithm.name }}</a>
     {% endif %}
-    by <i>{{ author.username }}</i>:
+    by {{ author.username }}
 </h3>
 
 <p>
@@ -33,53 +34,54 @@
 </p>
 
 {% if submits %}
-<table class="history_table">
-    <thead>
-        <th>ID</th>
-        <th>Date</th>
-        <th>Author</th>
-        <th>Algorithm</th>
-        <th class="verdict_column">Verdict</th>
-        <th>Test</th>
-        <th>Match score</th>
-        <th>Writing time</th>
-    </thead>
-    <tbody>
-        {% for submit in submits %}
-        <tr>
-            <td>
-                <a href="{% url 'algo:show_submit' submit.author.username submit.algorithm.slug submit.id %}">
-                    {{ submit.id }}
-                </a>
-            </td>
-            <td>
-                {{ submit.date|date:"H:i:s" }}<br />
-                {{ submit.date|date:"d M Y" }}
-            </td>
-            <td>{{ submit.author }}</td>
-            <td>{{ submit.algorithm }}</td>
-            <td class="verdict_column">
-                {% if submit.judge_verdict != None %}
-                <span class="verdict_{{ submit.get_verdict_kind }}">
-                    {{ submit.judge_verdict }}
-                </span>
-                {% endif %}
-            </td>
-            <td>
-                {% if submit.judge_test != None %}
-                {{ submit.judge_test }}
-                {% endif %}
-            </td>
-            <td>
-                {% if submit.is_scores_visible %}
-                {{ submit.score|floatformat:1 }}%
-                {% endif %}
-            </td>
-            <td>{{ submit.elapsed_seconds }} sec</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-</ul>
+<div class="table-responsive">
+    <table class="table table-hover table-striped history-table">
+        <thead>
+            <th>ID</th>
+            <th>Date</th>
+            <th>Author</th>
+            <th>Algorithm</th>
+            <th class="history-verdict-column">Verdict</th>
+            <th>Test</th>
+            <th>Match score</th>
+            <th>Writing time</th>
+        </thead>
+        <tbody>
+            {% for submit in submits %}
+            <tr>
+                <td>
+                    <a href="{% url 'algo:show_submit' submit.author.username submit.algorithm.slug submit.id %}">
+                        {{ submit.id }}
+                    </a>
+                </td>
+                <td>
+                    {{ submit.date|date:"H:i:s" }}<br />
+                    {{ submit.date|date:"d M Y" }}
+                </td>
+                <td>{{ submit.author }}</td>
+                <td>{{ submit.algorithm }}</td>
+                <td>
+                    {% if submit.judge_verdict != None %}
+                    <span class="verdict-{{ submit.get_verdict_kind }}">
+                        {{ submit.judge_verdict }}
+                    </span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if submit.judge_test != None %}
+                    {{ submit.judge_test }}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if submit.is_scores_visible %}
+                    {{ submit.score|floatformat:1 }}%
+                    {% endif %}
+                </td>
+                <td>{{ submit.elapsed_seconds }} sec</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endif %}
 {% endblock %}

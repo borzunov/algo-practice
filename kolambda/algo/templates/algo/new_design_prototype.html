@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!--<link rel="icon" href="../../favicon.ico">-->
+
+    <title>Dashboard Template for Bootstrap</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://bootswatch.com/simplex/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <!-- <link href="http://getbootstrap.com/examples/dashboard/dashboard.css" rel="stylesheet"> -->
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="http://getbootstrap.com/assets/js/ie-emulation-modes-warning.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <style>
+        /*
+        * Base structure
+        */
+        /* Move down content because we have a fixed navbar that is 50px tall */
+
+        body {
+            padding-top: 50px;
+        }
+        /*
+        * Global add-ons
+        */
+
+        .sub-header {
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        /*
+        * Sidebar
+        */
+        /* Hide for mobile, show later */
+
+        .sidebar {
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .sidebar {
+                position: fixed;
+                top: 51px;
+                bottom: 0;
+                left: 0;
+                z-index: 1000;
+                display: block;
+                padding: 20px;
+                overflow-x: hidden;
+                overflow-y: auto;
+                /* Scrollable contents if viewport is shorter than content. */
+                background-color: #f5f5f5;
+                border-right: 1px solid #eee;
+            }
+        }
+        /* Sidebar navigation */
+
+        .nav-sidebar {
+            margin-right: -21px;
+            /* 20px padding + 1px border */
+            margin-bottom: 20px;
+            margin-left: -20px;
+        }
+
+        .nav-sidebar > li > a {
+            padding-right: 20px;
+            padding-left: 20px;
+        }
+        /*.nav-sidebar > .active > a,
+        .nav-sidebar > .active > a:hover,
+        .nav-sidebar > .active > a:focus {
+            color: #fff;
+            background-color: #428bca;
+        }*/
+        /*
+        * Main content
+        */
+
+        .main {
+            padding: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .main {
+                padding-right: 40px;
+                padding-left: 40px;
+            }
+        }
+
+        .main .page-header {
+            margin-top: 0;
+        }
+        /*
+        * Placeholder dashboard ideas
+        */
+        /*.placeholders {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .placeholders h4 {
+            margin-bottom: 0;
+        }
+        .placeholder {
+            margin-bottom: 20px;
+        }
+        .placeholder img {
+            display: inline-block;
+            border-radius: 50%;
+        }*/
+
+        .navbar-default {
+            background-color: #eee;
+            border-color: #ddd;
+        }
+
+        .page-header {
+            border-bottom: none;
+            margin-bottom: 10px;
+        }
+
+        body {
+            color: #444;
+            font-size: 13px;
+        }
+
+        .scoreboard-table {
+            width: auto;
+        }
+
+        .scoreboard-bad {
+            background-color: #f2d6d6;
+        }
+
+        .scoreboard-good {
+            background-color: #fcf8cb;
+        }
+
+        .scoreboard-perfect {
+            background-color: #cff0c8;
+        }
+
+        .scoreboard-table a {
+            color: #666;
+            text-decoration: underline;
+        }
+
+        .scoreboard-table a:hover {
+            color: #444;
+        }
+
+        .scoreboard-table th a {
+            color: #505050;
+        }
+
+        .scoreboard-table th a:hover {
+            color: #303030;
+        }
+
+        .scoreboard-current-user {
+            background-color: #eee;
+        }
+
+        .scoreboard-table a.scoreboard-small-link {
+            font-size: 11px;
+        }
+
+        .scoreboard-table,
+        .scoreboard-table tr,
+        .scoreboard-table th,
+        .scoreboard-table td {
+            border-color: #ccc !important;
+        }
+
+        .scoreboard-algorithm-checked {
+            color: gray;
+        }
+
+        .scoreboard-table tbody tr {
+            height: 83px;
+        }
+
+        .scoreboard-table th,
+        .scoreboard-table td {
+            text-align: center;
+            vertical-align: middle !important;
+            width: 120px;
+        }
+
+        .last_submit_elapsed_seconds {
+            font-size: 11px;
+            margin-top: 3px;
+        }
+
+        .check_random_link {
+            font-weight: normal;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">Algorithm Practice</a>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="#"><b>guest</b></a></li>
+                    <li><a href="#">About</a></li>
+                    <li><a href="#">Log out</a></li>
+                </ul>
+                <!--<form class="navbar-form navbar-right">
+            <input type="text" class="form-control" placeholder="Search...">
+          </form>-->
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row">
+            <!-- <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+            <li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li>
+            <li><a href="#">Reports</a></li>
+            <li><a href="#">Analytics</a></li>
+            <li><a href="#">Export</a></li>
+          </ul>
+          <ul class="nav nav-sidebar">
+            <li><a href="">Nav item</a></li>
+            <li><a href="">Nav item again</a></li>
+            <li><a href="">One more nav</a></li>
+            <li><a href="">Another nav item</a></li>
+            <li><a href="">More navigation</a></li>
+          </ul>
+          <ul class="nav nav-sidebar">
+            <li><a href="">Nav item again</a></li>
+            <li><a href="">One more nav</a></li>
+            <li><a href="">Another nav item</a></li>
+          </ul>
+        </div> -->
+            <div class="main">
+                <h3 class="page-header">Scoreboard</h3>
+
+                <!-- <div class="row placeholders">
+            <div class="col-xs-6 col-sm-3 placeholder">
+              <img data-src="http://getbootstrap.com/examples/dashboard/holder.js/200x200/auto/sky" class="img-responsive" alt="Generic placeholder thumbnail">
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              <img data-src="http://getbootstrap.com/examples/dashboard/holder.js/200x200/auto/vine" class="img-responsive" alt="Generic placeholder thumbnail">
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              <img data-src="http://getbootstrap.com/examples/dashboard/holder.js/200x200/auto/sky" class="img-responsive" alt="Generic placeholder thumbnail">
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+            <div class="col-xs-6 col-sm-3 placeholder">
+              <img data-src="http://getbootstrap.com/examples/dashboard/holder.js/200x200/auto/vine" class="img-responsive" alt="Generic placeholder thumbnail">
+              <h4>Label</h4>
+              <span class="text-muted">Something else</span>
+            </div>
+          </div>
+
+          <h2 class="sub-header">Section title</h2> -->
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover scoreboard-table">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <div>Algorithm</div>
+                                    <div class="check_random_link">
+                                        <a href="/" class="scoreboard-small-link">random</a>
+                                    </div>
+                                </th>
+                                <th class="scoreboard-current-user">
+                                    <a href="/">Umqra</a>
+                                </th>
+                                <th>
+                                    <a href="/">Um_nik</a>
+                                </th>
+                                <th>
+                                    <a href="/">Merkurev</a>
+                                </th>
+                                <th>
+                                    <a href="/">kb</a>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <a href="/">pi-function</a>
+                                </td>
+                                <td class="scoreboard-perfect">
+                                    <div>100.0%</div>
+                                    <div class="last_submit_elapsed_seconds">36 sec</div>
+                                    <div class="last_submit_time">
+                                        <a href="/" class="scoreboard-small-link">2 weeks ago</a>
+                                    </div>
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="/">heavy-light</a>
+                                </td>
+                                <td></td>
+                                <td class="scoreboard-bad">
+                                    <div>WA 3</div>
+                                    <div class="last_submit_time">
+                                        <a href="/" class="scoreboard-small-link">1 month ago</a>
+                                    </div>
+                                </td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="/">A+B on C++</a>
+                                    <span class="scoreboard-algorithm-checked" title="The submits will be checked for correctness via Timus Online Judge">&#10004;</span>
+                                </td>
+                                <td class="scoreboard-perfect">
+                                    <div>100.0%</div>
+                                    <div class="last_submit_elapsed_seconds">12 sec</div>
+                                    <div class="last_submit_time">
+                                        <a href="/" class="scoreboard-small-link">1 week ago</a>
+                                    </div>
+                                </td>
+                                <td class="scoreboard-perfect">
+                                    <div>100.0%</div>
+                                    <div class="last_submit_elapsed_seconds">6 sec</div>
+                                    <div class="last_submit_time">
+                                        <a href="/" class="scoreboard-small-link">2 minutes ago</a>
+                                    </div>
+                                </td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="/">A+B on Java</a>
+                                    <span class="scoreboard-algorithm-checked" title="The submits will be checked for correctness via Timus Online Judge">&#10004;</span>
+                                </td>
+                                <td class="scoreboard-good">
+                                    <div>66.6%</div>
+                                    <div class="last_submit_elapsed_seconds">14 sec</div>
+                                    <div class="last_submit_time">
+                                        <a href="/" class="scoreboard-small-link">1 month ago</a>
+                                    </div>
+                                </td>
+                                <td class="scoreboard-bad">
+                                    <div>CE</div>
+                                    <div class="last_submit_time">
+                                        <a href="/" class="scoreboard-small-link">1 month ago</a>
+                                    </div>
+                                </td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="http://getbootstrap.com/dist/js/bootstrap.min.js"></script>
+    <!-- Just to make our placeholder images work. Don't actually copy the next line! -->
+    <script src="http://getbootstrap.com/assets/js/vendor/holder.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="http://getbootstrap.com/assets/js/ie10-viewport-bug-workaround.js"></script>
+</body>
+
+</html>

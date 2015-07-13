@@ -12,15 +12,18 @@
 {% endblock %}
 
 {% block content %}
-<div class="navigation_box">
-    &laquo; <a href="{% url 'algo:index' %}">Scoreboard</a>
-</div>
+<ul class="breadcrumb editor-breadcrumb">
+    <li><a href="{% url 'algo:index' %}">Home</a></li>
+    <li class="active">Check {{ algorithm.name }}</li>
+</ul>
 
-<div class="check_content">
-    <div class="check_elapsed_time">Time: <span class="stop_watch"></span></div>
-    <h2>Checking {{ algorithm.name }}</h2>
+<div class="check-content">
+    <div class="check-writing-time">Time: <span class="stop_watch"></span></div>
+    <h3 class="page-header editor-header check-header">
+        Checking {{ algorithm.name }}
+    </h3>
 
-    <form class="check_code_form" action="{% url 'algo:create_submit' algorithm_slug=algorithm.slug %}" method="post">
+    <form action="{% url 'algo:create_submit' algorithm_slug=algorithm.slug %}" method="post">
         {% csrf_token %}
         <div class="check_code_area">
             <textarea id="source_code" name="source_code">{{ given_code }}
@@ -58,7 +61,7 @@
     function resizeEditor(editor) {
         var width = 800;
         $('.check_code_area').hide();
-        var height = $(window).height() - $('body').height() - 40;
+        var height = $(window).height() - $('body').height() - 70;
         $('.check_code_area').show();
         editor.setSize(width, height);
         return {width: width, height: height};
