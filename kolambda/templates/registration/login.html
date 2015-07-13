@@ -1,20 +1,22 @@
-{% if form.errors %}
-<p>Your username and password didn't match. Please try again.</p>
-{% endif %}
+{% extends "algo/base.html" %}
+{% load staticfiles %}
+{% load bootstrap3 %}
 
-<form method="post" action="{% url 'login' %}">
-{% csrf_token %}
-<table>
-<tr>
-    <td>{{ form.username.label_tag }}</td>
-    <td>{{ form.username }}</td>
-</tr>
-<tr>
-    <td>{{ form.password.label_tag }}</td>
-    <td>{{ form.password }}</td>
-</tr>
-</table>
+{% block title %}Login - {{ block.super }}{% endblock %}
 
-<input type="submit" value="login" />
-<input type="hidden" name="next" value="{{ next }}" />
-</form>
+{% block content %}
+<div class="well login-well">
+    <form class="form-horizontal" method="post" action="{% url 'login' %}">
+        <legend>Sign in</legend>
+        {% csrf_token %}
+        {% bootstrap_form form layout="horizontal" %}
+        <input type="hidden" name="next" value="{{ next }}" />
+        {% buttons %}
+            <div class="col-md-3"></div>
+            <div class="col-md-9">
+                <button type="submit" class="btn btn-primary">Sign in</button>
+            </div>
+        {% endbuttons %}
+    </form>
+</div>
+{% endblock %}

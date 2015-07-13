@@ -36,9 +36,13 @@
             </div>
             <div id="navbar" class="navbar-collapse collapse">
                 <ul class="nav navbar-nav navbar-right">
+                    {% if request.user.is_authenticated %}
                     <li><a href="{% url 'algo:history' author_username=request.user.username %}"><b>{{ request.user.username }}</b></a></li>
+                    {% endif %}
                     <li><a href="#">About</a></li>
+                    {% if request.user.is_authenticated %}
                     <li><a href="{% url 'logout' %}">Log out</a></li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
