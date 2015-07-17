@@ -14,7 +14,8 @@ def login_into_judge():
     session.post('http://acm.timus.ru/authedit.aspx', data={
         'Action': 'edit',
         'JudgeID': settings.TIMUS_JUDGE_ID,
-        'Password': ''})
+        'Password': ''},
+        timeout=settings.TIMUS_REQUEST_TIMEOUT_SECONDS)
     return session
 
 
@@ -40,7 +41,8 @@ def submit_to_judge(submit_id):
             'ProblemNum': str(submit.algorithm.judge_problem_id),
             'Language': str(submit.algorithm.language.judge_language_id),
             'Source': submit.source_code},
-            allow_redirects=False)
+            allow_redirects=False,
+            timeout=settings.TIMUS_REQUEST_TIMEOUT_SECONDS)
         if response.status_code != 303:
             raise JudgeAPIException('Got status code {}, expected 303'
                                     .format(response.status_code))
@@ -49,7 +51,7 @@ def submit_to_judge(submit_id):
                                     .format(response.headers['location']))
         verdict = 'Checking'
     except (requests.exceptions.RequestException, JudgeAPIException) as err:
-        verdict = 'Sending failed'
+        verdict = 'Failed to send'
         submit.judge_comment = str(err)
     submit.judge_verdict = verdict
     submit.judge_submit_date = timezone.now()
@@ -57,7 +59,9 @@ def submit_to_judge(submit_id):
         submit.awaiting_for_verdict = False
     submit.save()
 
-    if submit.get_verdict_type() == 'waiting':
+    if submit.get_verdict_type() != 'waiting':
+        handle_next_submit()
+    else:
         update_judge_verdict.delay(submit_id, session, 1)
 
 
@@ -75,6 +79,21 @@ def invoke_submit_to_judge(submit_id):
             delay = math.ceil(max(
                 settings.TIMUS_SECONDS_BETWEEN_SUBMITS - elapsed_seconds, 0))
     submit_to_judge.apply_async((submit_id,), countdown=delay)
+
+
+def handle_next_submit():
+    # Warning! In rare cases, if a submit will be added in the view
+    # when the worker executes code right here, the same submit will be
+    # processed twice (because both the view and the worker invoke
+    # submit_to_judge.delay). It can lead to wrong verdicts in
+    # the case when there's the significant rest of the queue (then two
+    # instances of update_judge_verdict can invoke submit_to_judge.delay
+    # of two different submits from the rest of the queue simultaneously
+    # later).
+    next_enqueued = Submit.objects.filter(awaiting_for_verdict=True)
+    next_submit = next_enqueued.first()
+    if next_submit is not None:
+        invoke_submit_to_judge(next_submit.id)
 
 
 RELOAD_SCHEDULE = [
@@ -96,7 +115,8 @@ def calculate_reload_delay(prev_attempt_no):
 def get_judge_ce_details(session, judge_submit_id):
     try:
         response = session.get('http://acm.timus.ru/ce.aspx?id={}'
-                               .format(judge_submit_id))
+                               .format(judge_submit_id),
+                               timeout=settings.TIMUS_REQUEST_TIMEOUT_SECONDS)
         if response.status_code != 200:
             return None
     except requests.exceptions.RequestException:
@@ -114,7 +134,8 @@ def update_judge_verdict(submit_id, session, attempt_no):
                    submit.algorithm.judge_space_id,
                    submit.algorithm.judge_problem_id,
                    judge_author_id))
-        response = session.get(url)
+        response = session.get(url,
+                               timeout=settings.TIMUS_REQUEST_TIMEOUT_SECONDS)
         if response.status_code != 200:
             raise JudgeAPIException('Got status code {}, expected 200'
                                     .format(response.status_code))
@@ -133,7 +154,7 @@ def update_judge_verdict(submit_id, session, attempt_no):
         except (ValueError, IndexError):
             raise JudgeAPIException('Invalid response text')
     except (requests.exceptions.RequestException, JudgeAPIException) as err:
-        verdict = 'Check failed'
+        verdict = 'Failed to check'
         test = None
         submit.judge_comment = str(err)
     submit.judge_verdict = verdict
@@ -144,18 +165,7 @@ def update_judge_verdict(submit_id, session, attempt_no):
     submit.save()
 
     if submit.get_verdict_type() != 'waiting':
-        # Warning! In rare cases, if a submit will be added in the view
-        # when the worker executes code right here, the same submit will be
-        # processed twice (because both the view and the worker invoke
-        # submit_to_judge.delay). It can lead to wrong verdicts in
-        # the case when there's the significant rest of the queue (then two
-        # instances of update_judge_verdict can invoke submit_to_judge.delay
-        # of two different submits from the rest of the queue simultaneously
-        # later).
-        next_enqueued = Submit.objects.filter(awaiting_for_verdict=True)
-        next_submit = next_enqueued.first()
-        if next_submit is not None:
-            invoke_submit_to_judge(next_submit.id)
+        handle_next_submit()
     else:
         update_judge_verdict.apply_async(
             (submit_id, session, attempt_no + 1),

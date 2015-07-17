@@ -30,12 +30,14 @@ class Algorithm(models.Model):
                 self.judge_problem_id is not None)
 
 
+#  Because of particularity of verdicts handling, a verdict mustn't be
+#  a prefix of another verdict
 JUDGE_VERDICTS = {
     'Enqueued':                ('UK', 'waiting'),
     'Sending':                 ('UK', 'waiting'),
-    'Sending failed':          ('ERR', 'error'),
+    'Failed to send':          ('ERR', 'error'),
     'Checking':                ('UK', 'waiting'),
-    'Checking failed':         ('ERR', 'error'),
+    'Failed to check':         ('ERR', 'error'),
 
     'Waiting':                 ('UK', 'waiting'),
     'Compiling':               ('UK', 'waiting'),
